@@ -1,0 +1,8 @@
+# Prefer setting Root Directory = backend in Railway service settings.
+# This file documents the API service expectations.
+[build]
+builder = "DOCKERFILE"
+dockerfilePath = "backend/Dockerfile"
+
+[deploy]
+startCommand = "cd backend && uvicorn app.main:app --host 0.0.0.0 --port $PORT"
