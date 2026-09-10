@@ -1,8 +1,11 @@
 /**
- * Client API SOS Sang 229 — passe par le proxy Vite `/api` → backend :8000.
+ * Client API SOS Sang 229.
+ * En local: proxy Vite `/api` → :8000.
+ * Sur Vercel: rewrites `/api` → API Railway (voir vercel.json).
+ * Override possible: VITE_API_BASE.
  */
 
-const API_BASE = "/api";
+const API_BASE = (import.meta.env.VITE_API_BASE || "/api").replace(/\/$/, "");
 
 const ERROR_FR = {
   "A donor with this phone is already registered.":
