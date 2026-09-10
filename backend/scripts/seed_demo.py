@@ -179,7 +179,7 @@ def main() -> None:
                     id=DONOR_ID,
                     display_name="Donneur Demo",
                     blood_group=BloodGroup.O_POSITIVE,
-                    phone="+22900000000",
+                    phone="0190000001",
                     city="Cotonou",
                     location=_pt(2.43, 6.36),
                     is_available=True,
@@ -229,4 +229,9 @@ def main() -> None:
 
 
 if __name__ == "__main__":
-    main()
+    try:
+        main()
+    except Exception:
+        import traceback
+        traceback.print_exc()
+        raise
