@@ -1,8 +1,8 @@
 import { useState } from "react";
 import BloodGroupSelect from "../components/BloodGroupSelect.jsx";
-import DemoBanner from "../components/DemoBanner.jsx";
 import PageFrame from "../components/PageFrame.jsx";
 import PageHeader from "../components/PageHeader.jsx";
+import { createDonor } from "../api/client.js";
 import { DEMO_CITIES } from "../data/demo.js";
 
 const INITIAL = {
@@ -13,11 +13,48 @@ const INITIAL = {
   gpsConsent: false,
 };
 
+/** Normalize to 10 Benin digits starting with 01, or null if invalid. */
+function normalizeBeninPhone(raw) {
+  let digits = String(raw || "").replace(/\D/g, "");
+  if (digits.startsWith("229") && digits.length === 13) {
+    digits = digits.slice(3);
+  }
+  if (digits.length !== 10 || !digits.startsWith("01")) return null;
+  return digits;
+}
+
+function readGpsIfConsented(consent) {
+  if (!consent || !navigator.geolocation) {
+    return Promise.resolve(null);
+  }
+  return new Promise((resolve) => {
+    const timer = window.setTimeout(() => resolve(null), 4000);
+    navigator.geolocation.getCurrentPosition(
+      (pos) => {
+        window.clearTimeout(timer);
+        resolve({
+          latitude: pos.coords.latitude,
+          longitude: pos.coords.longitude,
+        });
+      },
+      () => {
+        window.clearTimeout(timer);
+        resolve(null);
+      },
+      { enableHighAccuracy: false, maximumAge: 60_000, timeout: 3500 },
+    );
+  });
+}
+
 export default function DonorRegistration({ onToast }) {
   const [form, setForm] = useState(INITIAL);
   const [submitted, setSubmitted] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
 
-  const canSubmit = Boolean(form.bloodGroup && form.phone.trim() && form.city);
+  const phoneOk = normalizeBeninPhone(form.phone) !== null;
+  const canSubmit = Boolean(
+    form.bloodGroup && phoneOk && form.city && !submitting,
+  );
 
   function update(field) {
     return (event) => {
@@ -27,28 +64,42 @@ export default function DonorRegistration({ onToast }) {
     };
   }
 
-  function handleSubmit(event) {
+  async function handleSubmit(event) {
     event.preventDefault();
-    if (!canSubmit) return;
-    setSubmitted(true);
-    onToast(
-      "Profil donneur simulé. Rien n’a été envoyé ni enregistré — maquette locale uniquement.",
-    );
-    setForm(INITIAL);
+    const phone = normalizeBeninPhone(form.phone);
+    if (!form.bloodGroup || !phone || !form.city || submitting) return;
+
+    setSubmitting(true);
+    try {
+      const location = await readGpsIfConsented(form.gpsConsent);
+      const payload = {
+        display_name: form.displayName.trim() || "Donneur",
+        blood_group: form.bloodGroup,
+        phone,
+        city: form.city,
+      };
+      if (location) payload.location = location;
+
+      const created = await createDonor(payload);
+      setSubmitted(true);
+      onToast(
+        `Donneur enregistré : ${created.display_name} (${created.blood_group}) · ${created.city}`,
+      );
+      setForm(INITIAL);
+    } catch (err) {
+      onToast(err?.message || "Échec de l'inscription donneur.");
+    } finally {
+      setSubmitting(false);
+    }
   }
 
   return (
     <PageFrame>
       <div className="space-y-8">
         <PageHeader kicker="Volontaire" title="Inscription" highlight="donneur">
-          Créez un profil fictif pour tester le parcours. Téléphone et ville
-          restent locaux à cet écran.
+          Rejoignez le réseau SOS Sang 229. Votre profil sert au matching en
+          cas d’urgence transfusionnelle près de chez vous.
         </PageHeader>
-
-        <DemoBanner>
-          Ne saisissez pas de vrai numéro, de vrai nom ni une adresse réelle.
-          Exemple : Donneur Demo, 00 00 00 00, Zone Demo.
-        </DemoBanner>
 
         <form className="card space-y-6" onSubmit={handleSubmit} autoComplete="off">
           <div className="space-y-2">
@@ -60,10 +111,13 @@ export default function DonorRegistration({ onToast }) {
               className="field-input"
               value={form.displayName}
               onChange={update("displayName")}
-              placeholder="Donneur Demo"
+              placeholder="Prénom ou alias"
               autoComplete="off"
             />
-            <p className="field-hint">Libellé fictif visible dans la maquette uniquement.</p>
+            <p className="field-hint">
+              Visible uniquement pour le suivi interne ; le téléphone n’est pas
+              exposé publiquement.
+            </p>
           </div>
 
           <div className="space-y-2">
@@ -80,21 +134,21 @@ export default function DonorRegistration({ onToast }) {
 
           <div className="space-y-2">
             <label htmlFor="phone" className="field-label">
-              Téléphone <span className="font-normal text-accent">(requis, fictif)</span>
+              Téléphone <span className="font-normal text-accent">(requis)</span>
             </label>
             <input
               id="phone"
               type="tel"
-              inputMode="tel"
+              inputMode="numeric"
               className="field-input"
               value={form.phone}
               onChange={update("phone")}
-              placeholder="00 00 00 00"
+              placeholder="0190123456"
               autoComplete="off"
               required
             />
             <p className="field-hint">
-              Placeholder volontairement neutre. N’entrez pas un numéro béninois réel.
+              Exactement 10 chiffres béninois commençant par 01 (ex. 0190123456).
             </p>
           </div>
 
@@ -109,7 +163,7 @@ export default function DonorRegistration({ onToast }) {
               onChange={update("city")}
               required
             >
-              <option value="">Choisir une zone démo</option>
+              <option value="">Choisir une ville</option>
               {DEMO_CITIES.map((city) => (
                 <option key={city} value={city}>
                   {city}
@@ -128,32 +182,30 @@ export default function DonorRegistration({ onToast }) {
                 onChange={update("gpsConsent")}
               />
               <span>
-                J’accepte, dans une future version, de partager une position
-                approximative pour le matching.{" "}
-                <strong className="font-semibold">Aucun GPS réel n’est demandé ici.</strong>
+                J’accepte de partager une position approximative pour améliorer
+                le matching avec les hôpitaux proches.
               </span>
             </label>
             <p className="mt-2 text-sm text-accent">
               {form.gpsConsent
-                ? "Consentement noté pour la maquette. La géolocalisation du navigateur reste désactivée."
-                : "Option désactivée : aucune coordonnée ne sera lue."}
+                ? "Si le navigateur l’autorise, une position approximative sera enregistrée avec votre profil."
+                : "Sans consentement, aucune coordonnée GPS n’est lue."}
             </p>
           </fieldset>
 
           <div className="space-y-2">
             <button type="submit" className="btn-primary w-full" disabled={!canSubmit}>
-              Enregistrer le profil (démo)
+              {submitting ? "Enregistrement…" : "Rejoindre le réseau"}
             </button>
-            {!canSubmit ? (
+            {!canSubmit && !submitting ? (
               <p className="field-hint">
-                Le bouton s’active lorsque le groupe, le téléphone fictif et la
-                ville sont renseignés.
+                Le bouton s’active lorsque le groupe, un téléphone 01… (10 chiffres) et
+                la ville sont renseignés.
               </p>
             ) : null}
             {submitted ? (
               <p className="text-sm font-semibold text-success">
-                Dernière action : succès local, formulaire réinitialisé. Aucune
-                donnée conservée.
+                Profil enregistré. Merci de rejoindre le réseau.
               </p>
             ) : null}
           </div>

@@ -1,16 +1,18 @@
-/** Données clairement fictives — ne pas remplacer par des informations réelles. */
+/** Constantes UI : groupes, villes, fallbacks hors ligne. */
 
 export const BLOOD_GROUPS = ["O+", "O-", "A+", "A-", "B+", "B-", "AB+", "AB-"];
 
 export const DEMO_CITIES = [
-  "Zone Demo — Cotonou",
-  "Zone Demo — Porto-Novo",
-  "Zone Demo — Parakou",
-  "Ville Demo",
+  "Cotonou",
+  "Porto-Novo",
+  "Parakou",
+  "Abomey-Calavi",
+  "Bohicon",
+  "Natitingou",
 ];
 
 /**
- * Structures clairement fictives, présentées comme reconnues par l’État.
+ * Liste de secours si l’API hôpitaux est indisponible.
  * Plus tard : charger via l’API en filtrant `is_recognized=true`
  * (ex. GET /hospitals?is_recognized=true). Aucun saisie libre côté alerte.
  */
@@ -94,5 +96,9 @@ export const STATUS_META = {
   pourvue: {
     label: "Pourvue",
     className: "bg-success/10 text-success",
+  },
+  annulee: {
+    label: "Annulée",
+    className: "bg-light text-accent",
   },
 };

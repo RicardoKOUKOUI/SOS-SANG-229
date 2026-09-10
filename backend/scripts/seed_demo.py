@@ -1,8 +1,8 @@
 """Insert clearly fictional demo rows.
 
 Never logs phone numbers, GPS coordinates, or blood groups.
-Hospitals: one recognized (usable for urgencies) and one not.
-Re-running updates hospital flags and skips existing urgency rows.
+Hospitals: several recognized Benin facilities (usable for urgencies) plus one not.
+Re-running upserts hospital flags/names and skips existing urgency rows.
 """
 
 from __future__ import annotations
@@ -30,8 +30,10 @@ from app.models import (  # noqa: E402
 )
 from app.rules import require_recognized_hospital  # noqa: E402
 
-# Fictional Zone Demo point (not a residence or real facility). Do not print.
-_DEMO_POINT = WKTElement("POINT(2.42 6.37)", srid=4326)
+# Approximate public facility centroids (WGS84). Do not print.
+def _pt(lon: float, lat: float) -> WKTElement:
+    return WKTElement(f"POINT({lon} {lat})", srid=4326)
+
 
 RECOGNIZED_HOSPITAL_ID = UUID("00000000-0000-4000-8000-000000000010")
 UNRECOGNIZED_HOSPITAL_ID = UUID("00000000-0000-4000-8000-000000000011")
@@ -42,28 +44,89 @@ CONFIRM_ID = UUID("00000000-0000-4000-8000-000000000030")
 # Backward-compatible alias used by earlier seed revisions.
 HOSPITAL_ID = RECOGNIZED_HOSPITAL_ID
 
+# Recognized Benin hospitals for the alert dropdown (pitch-ready).
+BENIN_HOSPITALS: list[tuple[UUID, str, str, float, float]] = [
+    # id, name, city, lon, lat
+    (
+        UUID("00000000-0000-4000-8000-000000000010"),
+        "CNHU-HKM Cotonou",
+        "Cotonou",
+        2.4303,
+        6.3569,
+    ),
+    (
+        UUID("00000000-0000-4000-8000-000000000012"),
+        "CHU Mère et Enfant Lagune",
+        "Cotonou",
+        2.4205,
+        6.3602,
+    ),
+    (
+        UUID("00000000-0000-4000-8000-000000000013"),
+        "Hôpital de Zone Abomey-Calavi",
+        "Abomey-Calavi",
+        2.3530,
+        6.4485,
+    ),
+    (
+        UUID("00000000-0000-4000-8000-000000000014"),
+        "CHD Ouémé-Plateau Porto-Novo",
+        "Porto-Novo",
+        2.6283,
+        6.4969,
+    ),
+    (
+        UUID("00000000-0000-4000-8000-000000000015"),
+        "Hôpital de Zone Parakou",
+        "Parakou",
+        2.6300,
+        9.3370,
+    ),
+    (
+        UUID("00000000-0000-4000-8000-000000000016"),
+        "Centre National de Transfusion Sanguine",
+        "Cotonou",
+        2.4250,
+        6.3650,
+    ),
+    (
+        UUID("00000000-0000-4000-8000-000000000017"),
+        "Hôpital de Zone Bohicon",
+        "Bohicon",
+        2.0670,
+        7.1780,
+    ),
+]
+
 
 def _upsert_hospital(
     session,
     hospital_id: UUID,
     *,
     name: str,
+    city: str,
+    location: WKTElement | None,
     is_recognized: bool,
+    contact_name: str | None = "Contact Demo",
+    contact_phone: str | None = "+22900000099",
 ) -> Hospital:
     hospital = session.get(Hospital, hospital_id)
     if hospital is None:
         hospital = Hospital(
             id=hospital_id,
             name=name,
-            city="Zone Demo",
-            location=_DEMO_POINT,
-            contact_name="Contact Demo",
-            contact_phone="+22900000099",
+            city=city,
+            location=location,
+            contact_name=contact_name,
+            contact_phone=contact_phone,
             is_recognized=is_recognized,
         )
         session.add(hospital)
         return hospital
     hospital.name = name
+    hospital.city = city
+    if location is not None:
+        hospital.location = location
     hospital.is_recognized = is_recognized
     return hospital
 
@@ -71,29 +134,43 @@ def _upsert_hospital(
 def main() -> None:
     session = get_session_factory()()
     try:
-        recognized = _upsert_hospital(
-            session,
-            RECOGNIZED_HOSPITAL_ID,
-            name="Hopital Demo",
-            is_recognized=True,
-        )
+        recognized_rows: list[Hospital] = []
+        for hospital_id, name, city, lon, lat in BENIN_HOSPITALS:
+            row = _upsert_hospital(
+                session,
+                hospital_id,
+                name=name,
+                city=city,
+                location=_pt(lon, lat),
+                is_recognized=True,
+            )
+            recognized_rows.append(row)
+
         _upsert_hospital(
             session,
             UNRECOGNIZED_HOSPITAL_ID,
             name="Clinique Demo Non Reconnue",
+            city="Cotonou",
+            location=_pt(2.42, 6.37),
             is_recognized=False,
         )
-        require_recognized_hospital(recognized)
+
+        primary = recognized_rows[0]
+        require_recognized_hospital(primary)
 
         already = session.scalar(
             select(UrgencyRequest.id).where(UrgencyRequest.public_ref == "REQ-DEMO-001")
         )
         if already is not None:
+            # Keep demo urgency pointed at the primary recognized hospital.
+            urgency = session.get(UrgencyRequest, URGENCY_ID)
+            if urgency is not None:
+                urgency.hospital_id = RECOGNIZED_HOSPITAL_ID
+                urgency.zone_label = "Cotonou — Akpakpa"
             session.commit()
             print(
-                "Demo seed already present (REQ-DEMO-001). "
-                "Hospital recognition flags refreshed. "
-                "Sensitive fields are not printed."
+                f"Demo seed refreshed: {len(BENIN_HOSPITALS)} recognized hospitals, "
+                "REQ-DEMO-001 already present. Sensitive fields are not printed."
             )
             return
 
@@ -104,8 +181,8 @@ def main() -> None:
                     display_name="Donneur Demo",
                     blood_group=BloodGroup.O_POSITIVE,
                     phone="+22900000000",
-                    city="Zone Demo",
-                    location=_DEMO_POINT,
+                    city="Cotonou",
+                    location=_pt(2.43, 6.36),
                     is_available=True,
                 )
             )
@@ -119,7 +196,7 @@ def main() -> None:
                 hospital_id=RECOGNIZED_HOSPITAL_ID,
                 status=UrgencyStatus.ALERTING,
                 units_needed=1,
-                zone_label="Zone Demo",
+                zone_label="Cotonou — Akpakpa",
                 alerted_donors_count=1,
                 confirmed_donations_count=1,
             )
@@ -143,9 +220,9 @@ def main() -> None:
         )
         session.commit()
         print(
-            "Inserted fictional demo rows "
-            "(Donneur Demo, Hopital Demo recognized, "
-            "Clinique Demo Non Reconnue, REQ-DEMO-001). "
+            f"Inserted fictional demo rows "
+            f"({len(BENIN_HOSPITALS)} recognized Benin hospitals, "
+            "Clinique Demo Non Reconnue, Donneur Demo, REQ-DEMO-001). "
             "Sensitive fields are not printed."
         )
     finally:

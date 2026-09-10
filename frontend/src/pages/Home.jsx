@@ -3,25 +3,25 @@ import UrgencyBadge from "../components/UrgencyBadge.jsx";
 
 const stats = [
   { value: "8", label: "Groupes sanguins" },
-  { value: "3", label: "Parcours à tester" },
-  { value: "0", label: "Donnée réelle stockée" },
+  { value: "< 3 min", label: "Pour lancer une alerte" },
+  { value: "229", label: "Bénin · indicatif" },
 ];
 
 const steps = [
   {
     n: "01",
     title: "Lancer l’alerte",
-    body: "Un établissement indique le groupe demandé et un lieu fictif. Rien n’est envoyé dans cette maquette.",
+    body: "Un établissement indique le groupe demandé et l’hôpital. L’alerte est enregistrée immédiatement.",
   },
   {
     n: "02",
-    title: "Trouver des réponses",
-    body: "Le matching SMS arrivera plus tard. Ici, on montre le parcours : clair, calme, compréhensible.",
+    title: "SMS aux donneurs proches",
+    body: "Les volontaires compatibles à proximité seront contactés par SMS (déploiement en cours).",
   },
   {
     n: "03",
     title: "Suivre jusqu’au don",
-    body: "Chaque demande fictive a un statut visible, pour rassurer l’équipe soignante et le proche.",
+    body: "Chaque demande a un statut visible pour rassurer l’équipe soignante et les proches.",
   },
 ];
 
@@ -29,17 +29,17 @@ const actions = [
   {
     to: "/alerte",
     title: "Signaler une urgence",
-    body: "Simulez une demande pour un patient démo et un hôpital reconnu (liste officielle).",
+    body: "Créez une demande pour un patient et un hôpital reconnu.",
   },
   {
     to: "/donneur/inscription",
     title: "Devenir donneur",
-    body: "Profil fictif : groupe, téléphone démo, ville et consentement GPS.",
+    body: "Inscrivez votre groupe, téléphone et ville pour rejoindre le réseau.",
   },
   {
     to: "/suivi",
     title: "Suivre les demandes",
-    body: "Liste REQ-DEMO-* : ouverte, en matching ou pourvue.",
+    body: "Consultez les alertes : ouvertes, en matching ou pourvues.",
   },
 ];
 
@@ -62,9 +62,9 @@ export default function Home() {
             <span className="text-primary">vie</span> sauvée.
           </h1>
           <p className="mt-5 max-w-2xl text-lg leading-8 text-accent">
-            SOS Sang 229 rapproche un besoin de sang et des volontaires à
-            proximité. Cette version est une maquette statique : rien n’est
-            envoyé, rien n’est enregistré.
+            SOS Sang 229 relie les hôpitaux aux donneurs volontaires à
+            proximité. Inscrivez-vous ou lancez une alerte : le réseau SMS
+            arrive bientôt pour contacter les compatibles près de vous.
           </p>
           <div className="mt-8 flex flex-col gap-3 sm:flex-row">
             <Link to="/alerte" className="btn-primary w-full sm:w-auto">
@@ -87,7 +87,7 @@ export default function Home() {
 
       <section className="mx-auto max-w-5xl px-4 py-16 sm:px-6 lg:px-8">
         <p className="text-xs font-bold uppercase tracking-[0.16em] text-primary">
-          Comment ça marchera
+          Comment ça marche
         </p>
         <h2 className="mt-2 text-3xl font-extrabold tracking-tight text-secondary">
           Trois gestes, une <span className="text-primary">chaîne</span> claire
@@ -106,11 +106,11 @@ export default function Home() {
       <section className="bg-light/70">
         <div className="mx-auto max-w-5xl px-4 py-16 sm:px-6 lg:px-8">
           <h2 className="text-3xl font-extrabold tracking-tight text-secondary">
-            Explorer la <span className="text-primary">maquette</span>
+            Agir <span className="text-primary">maintenant</span>
           </h2>
           <p className="mt-3 max-w-2xl text-base leading-7 text-accent">
-            Quatre écrans pour valider le parcours produit. Données fictives
-            uniquement (Donneur Demo, Patient Demo, Zone Demo).
+            Trois parcours pour sauver des vies : signaler une urgence,
+            rejoindre le réseau de donneurs, ou suivre une demande en cours.
           </p>
           <div className="mt-8 grid gap-4 md:grid-cols-3">
             {actions.map((action) => (
@@ -132,9 +132,9 @@ export default function Home() {
         <div className="card">
           <h2 className="text-xl font-extrabold text-secondary">Confiance et données</h2>
           <p className="mt-2 text-base leading-7 text-accent">
-            Groupe sanguin, téléphone et localisation sont sensibles. Utilisez
-            uniquement des valeurs fictives (00 00 00 00, Zone Demo). Aucun
-            backend, SMS ou géolocalisation du navigateur n’est branché.
+            Groupe sanguin, téléphone et localisation sont des données
+            sensibles. Elles sont traitées avec soin : le téléphone et le GPS
+            ne sont jamais exposés dans les réponses publiques de l’API.
           </p>
         </div>
       </section>
@@ -143,7 +143,7 @@ export default function Home() {
         <div className="mx-auto flex max-w-5xl flex-col items-start gap-6 px-4 py-14 sm:flex-row sm:items-center sm:justify-between sm:px-6 lg:px-8">
           <div>
             <p className="text-sm font-bold uppercase tracking-wide text-white/80">
-              Prêt à tester
+              Prêt à agir
             </p>
             <p className="mt-2 text-2xl font-extrabold text-white sm:text-3xl">
               Une alerte, des réponses, une vie sauvée.
@@ -153,7 +153,7 @@ export default function Home() {
             to="/alerte"
             className="inline-flex items-center justify-center rounded-full bg-white px-6 py-3 text-base font-semibold text-primary shadow-soft hover:bg-light"
           >
-            Lancer une alerte démo
+            Lancer une alerte
           </Link>
         </div>
       </section>

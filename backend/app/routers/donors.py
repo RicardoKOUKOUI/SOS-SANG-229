@@ -20,8 +20,7 @@ router = APIRouter(prefix="/donors", tags=["donors"])
     status_code=status.HTTP_201_CREATED,
     summary="Register a donor",
     description=(
-        "Create a donor profile. Use fictional demo data only. "
-        "The response omits phone and GPS."
+        "Create a donor profile. The response omits phone and GPS."
     ),
 )
 def create_donor(payload: DonorCreate, db: Session = Depends(get_db)) -> Donor:
@@ -41,7 +40,7 @@ def create_donor(payload: DonorCreate, db: Session = Depends(get_db)) -> Donor:
         db.rollback()
         raise HTTPException(
             status_code=status.HTTP_409_CONFLICT,
-            detail="A donor with this phone is already registered.",
+            detail="Un donneur avec ce numéro est déjà inscrit.",
         ) from None
     db.refresh(donor)
     return donor

@@ -1,9 +1,10 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import BloodGroupSelect from "../components/BloodGroupSelect.jsx";
-import DemoBanner from "../components/DemoBanner.jsx";
 import PageFrame from "../components/PageFrame.jsx";
 import PageHeader from "../components/PageHeader.jsx";
 import UrgencyBadge from "../components/UrgencyBadge.jsx";
+import { createAlert, listRecognizedHospitals } from "../api/client.js";
 import { RECOGNIZED_HOSPITALS } from "../data/demo.js";
 
 const INITIAL = {
@@ -13,14 +14,48 @@ const INITIAL = {
 };
 
 export default function EmergencyAlert({ onToast }) {
+  const navigate = useNavigate();
   const [form, setForm] = useState(INITIAL);
   const [submitted, setSubmitted] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+  const [hospitals, setHospitals] = useState([]);
+  const [hospitalsError, setHospitalsError] = useState("");
 
-  const hospitalIsRecognized = RECOGNIZED_HOSPITALS.some(
-    (item) => item.is_recognized && item.name === form.hospital,
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      try {
+        const rows = await listRecognizedHospitals();
+        if (cancelled) return;
+        const recognized = (rows || []).filter((h) => h.is_recognized !== false);
+        setHospitals(recognized);
+        setHospitalsError("");
+      } catch (err) {
+        if (cancelled) return;
+        setHospitalsError(err?.message || "Impossible de charger les hôpitaux.");
+        // Fallback labels only — UUIDs from demo are not valid for API submit
+        setHospitals([]);
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  const hospitalOptions =
+    hospitals.length > 0
+      ? hospitals
+      : RECOGNIZED_HOSPITALS.filter((item) => item.is_recognized);
+
+  const hospitalIsRecognized = hospitalOptions.some(
+    (item) => String(item.id) === String(form.hospital),
   );
   const canSubmit = Boolean(
-    form.bloodGroup && form.patientName.trim() && hospitalIsRecognized,
+    form.bloodGroup &&
+      form.patientName.trim() &&
+      hospitalIsRecognized &&
+      hospitals.length > 0 &&
+      !submitting,
   );
 
   function update(field) {
@@ -29,36 +64,48 @@ export default function EmergencyAlert({ onToast }) {
     };
   }
 
-  function handleSubmit(event) {
+  async function handleSubmit(event) {
     event.preventDefault();
     if (!canSubmit) return;
-    setSubmitted(true);
-    onToast(
-      "Alerte simulée. Aucun SMS, aucun hôpital réel, aucune donnée patient n’a quitté cet appareil.",
-    );
-    setForm(INITIAL);
+    setSubmitting(true);
+    try {
+      const result = await createAlert({
+        blood_group_needed: form.bloodGroup,
+        patient_display_name: form.patientName.trim(),
+        hospital_id: form.hospital,
+      });
+      const matchCount = result?.matching?.match_count ?? 0;
+      const ref = result?.public_ref || "—";
+      setSubmitted(true);
+      onToast(
+        `Alerte créée · ref ${ref} · ${matchCount} donneur(s) compatible(s)`,
+      );
+      setForm(INITIAL);
+      if (result?.public_ref) {
+        navigate(`/suivi?ref=${encodeURIComponent(result.public_ref)}`);
+      }
+    } catch (err) {
+      onToast(err?.message || "Échec de la création d'alerte.");
+    } finally {
+      setSubmitting(false);
+    }
   }
 
   return (
     <PageFrame>
       <div className="space-y-8">
         <PageHeader kicker="Urgence" title="Alerte" highlight="don de sang">
-          Déclarez un besoin fictif. L’urgence est claire, le ton reste
+          Déclarez un besoin transfusionnel. L’urgence est claire, le ton reste
           rassurant.
         </PageHeader>
 
-        <UrgencyBadge>Alerte simulée · aucun envoi</UrgencyBadge>
-
-        <DemoBanner>
-          Patient démo uniquement. L’établissement doit figurer sur la liste
-          officielle de démonstration (structures reconnues). Exemple : Patient
-          Demo, Hôpital Demo Reconnu — Cotonou Nord.
-        </DemoBanner>
+        <UrgencyBadge>Alerte urgence · hôpital reconnu</UrgencyBadge>
 
         <form className="card space-y-6" onSubmit={handleSubmit} autoComplete="off">
           <div className="rounded-2xl bg-primary/5 px-5 py-4 text-sm leading-6 text-secondary">
-            Cette action représentera plus tard un appel aux donneurs
-            compatibles. Aujourd’hui, elle n’envoie rien.
+            L’alerte est enregistrée et les donneurs compatibles seront
+            contactés (SMS en cours de déploiement). Seuls les établissements
+            reconnus peuvent être choisis.
           </div>
 
           <div className="space-y-2">
@@ -75,7 +122,7 @@ export default function EmergencyAlert({ onToast }) {
 
           <div className="space-y-2">
             <label htmlFor="patientName" className="field-label">
-              Nom du patient (démo){" "}
+              Nom du patient{" "}
               <span className="font-normal text-accent">(requis)</span>
             </label>
             <input
@@ -83,12 +130,13 @@ export default function EmergencyAlert({ onToast }) {
               className="field-input"
               value={form.patientName}
               onChange={update("patientName")}
-              placeholder="Patient Demo"
+              placeholder="Prénom ou initiales"
               autoComplete="off"
               required
             />
             <p className="field-hint">
-              Interdit : nom d’un vrai patient ou d’un proche identifiable.
+              Préférez un prénom ou des initiales pour limiter l’exposition des
+              données personnelles.
             </p>
           </div>
 
@@ -107,35 +155,36 @@ export default function EmergencyAlert({ onToast }) {
               required
             >
               <option value="">Choisir un établissement reconnu</option>
-              {RECOGNIZED_HOSPITALS.filter((item) => item.is_recognized).map(
-                (hospital) => (
-                  <option key={hospital.id} value={hospital.name}>
-                    {hospital.name}
-                  </option>
-                ),
-              )}
+              {hospitalOptions.map((hospital) => (
+                <option key={hospital.id} value={hospital.id}>
+                  {hospital.name}
+                  {hospital.city ? ` — ${hospital.city}` : ""}
+                </option>
+              ))}
             </select>
             <p className="field-hint">
               Seules les structures reconnues par l’État peuvent être choisies —
               pour que le don arrive au bon endroit. La saisie libre d’un
               centre non listé n’est pas autorisée.
+              {hospitalsError
+                ? ` API indisponible (${hospitalsError}) — liste de secours affichée, envoi désactivé.`
+                : ""}
             </p>
           </div>
 
           <div className="space-y-2">
             <button type="submit" className="btn-primary w-full" disabled={!canSubmit}>
-              Envoyer l’alerte (démo)
+              {submitting ? "Envoi…" : "Envoyer l’alerte"}
             </button>
-            {!canSubmit ? (
+            {!canSubmit && !submitting ? (
               <p className="field-hint">
-                Renseignez le groupe, un nom démo et un hôpital reconnu de la
-                liste pour activer l’envoi simulé.
+                Renseignez le groupe, le patient et un hôpital reconnu de la
+                liste pour activer l’envoi.
               </p>
             ) : null}
             {submitted ? (
               <p className="text-sm font-semibold text-success">
-                Dernière action : alerte locale uniquement. Formulaire vidé, rien
-                n’est stocké.
+                Alerte créée. Redirection vers le suivi…
               </p>
             ) : null}
           </div>
