@@ -1,8 +1,8 @@
-"""PostGIS donor matching for an urgency.
+"""Donor matching for an urgency (haversine / city; no PostGIS).
 
 Default GPS radius: 15 km (15_000 m), overridable via MATCH_RADIUS_METERS.
-When both hospital and donor have GPS, use distance (PostGIS ``ST_DWithin``
-on geography, meters). Otherwise fall back to a case-insensitive city match.
+When both hospital and donor have GPS WKT, use haversine distance in meters.
+Otherwise fall back to a case-insensitive city match.
 
 Never log phone numbers, GPS coordinates, or blood groups.
 """
@@ -12,8 +12,7 @@ from __future__ import annotations
 import logging
 from dataclasses import dataclass
 
-from geoalchemy2.functions import ST_DWithin
-from sqlalchemy import Select, and_, func, or_, select
+from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from app.enums import BloodGroup, MatchMethod
@@ -92,17 +91,11 @@ def find_compatible_donors(
 ) -> list[MatchResult]:
     """Return available compatible donors near the hospital.
 
-    Production path uses PostGIS ``ST_DWithin`` (geography, meters).
-    Tests / non-Postgres use the same GPS-or-city rules in Python.
+    Always uses Python haversine / city rules so Text WKT works on Railway
+    Postgres without PostGIS.
     """
     groups = compatible_donor_groups(needed)
-    bind = session.get_bind()
-    dialect = bind.dialect.name if bind is not None else ""
-
-    if dialect == "postgresql":
-        results = _find_with_postgis(session, hospital, groups, radius_meters)
-    else:
-        results = _find_in_python(session, hospital, groups, radius_meters)
+    results = _find_in_python(session, hospital, groups, radius_meters)
 
     logger.info(
         "Matching finished: %s candidate(s), radius_m=%s (no PII logged)",
@@ -114,34 +107,6 @@ def find_compatible_donors(
 
 def _base_donor_filter(groups: tuple[BloodGroup, ...]) -> list:
     return [Donor.is_available.is_(True), Donor.blood_group.in_(groups)]
-
-
-def _find_with_postgis(
-    session: Session,
-    hospital: Hospital,
-    groups: tuple[BloodGroup, ...],
-    radius_meters: int,
-) -> list[MatchResult]:
-    filters = _base_donor_filter(groups)
-    city_clause = func.lower(func.trim(Donor.city)) == hospital.city.strip().lower()
-
-    if hospital.location is None:
-        stmt: Select[tuple[Donor]] = select(Donor).where(*filters, city_clause)
-    else:
-        gps_clause = and_(
-            Donor.location.is_not(None),
-            ST_DWithin(Donor.location, hospital.location, float(radius_meters)),
-        )
-        city_fallback = and_(Donor.location.is_(None), city_clause)
-        stmt = select(Donor).where(*filters, or_(gps_clause, city_fallback))
-
-    donors = list(session.scalars(stmt).unique().all())
-    matched: list[MatchResult] = []
-    for donor in donors:
-        result = _classify_loaded_donor(donor, hospital, radius_meters)
-        if result is not None:
-            matched.append(result)
-    return matched
 
 
 def _find_in_python(
@@ -171,9 +136,6 @@ def _classify_loaded_donor(
     distance: float | None = None
     if donor_point is not None and hospital_point is not None:
         distance = haversine_meters(donor_point, hospital_point)
-    elif donor.location is not None and hospital.location is not None:
-        # WKB from PostGIS: ST_DWithin already filtered; treat as GPS match.
-        return MatchResult(donor=donor, method=MatchMethod.GPS, distance_meters=None)
 
     ok, method = donor_is_nearby(
         donor_has_location=donor.location is not None,

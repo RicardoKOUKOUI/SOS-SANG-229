@@ -16,7 +16,6 @@ BACKEND_DIR = Path(__file__).resolve().parents[1]
 if str(BACKEND_DIR) not in sys.path:
     sys.path.insert(0, str(BACKEND_DIR))
 
-from geoalchemy2.elements import WKTElement  # noqa: E402
 from sqlalchemy import select  # noqa: E402
 
 from app.db import get_session_factory  # noqa: E402
@@ -31,8 +30,8 @@ from app.models import (  # noqa: E402
 from app.rules import require_recognized_hospital  # noqa: E402
 
 # Approximate public facility centroids (WGS84). Do not print.
-def _pt(lon: float, lat: float) -> WKTElement:
-    return WKTElement(f"POINT({lon} {lat})", srid=4326)
+def _pt(lon: float, lat: float) -> str:
+    return f"POINT({lon} {lat})"
 
 
 RECOGNIZED_HOSPITAL_ID = UUID("00000000-0000-4000-8000-000000000010")
@@ -105,7 +104,7 @@ def _upsert_hospital(
     *,
     name: str,
     city: str,
-    location: WKTElement | None,
+    location: str | None,
     is_recognized: bool,
     contact_name: str | None = "Contact Demo",
     contact_phone: str | None = "+22900000099",

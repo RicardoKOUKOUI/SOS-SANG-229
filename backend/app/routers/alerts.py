@@ -41,7 +41,7 @@ def _http_unrecognized() -> HTTPException:
     status_code=status.HTTP_201_CREATED,
     summary="Create an urgency and match nearby donors",
     description=(
-        "Requires a recognized `hospital_id`. Runs PostGIS matching "
+        "Requires a recognized `hospital_id`. Runs GPS/city matching "
         "(GPS within MATCH_RADIUS_METERS, default 15 km, else same city), "
         "stores `alerted_donors_count`, and links candidates without phones. "
         "Twilio is not called."

@@ -3,9 +3,7 @@
 import uuid
 from typing import TYPE_CHECKING
 
-from geoalchemy2 import Geography
-from geoalchemy2.elements import WKBElement
-from sqlalchemy import Boolean, Enum, Index, String, Uuid, text
+from sqlalchemy import Boolean, Enum, Index, String, Text, Uuid, text
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.enums import BloodGroup
@@ -21,14 +19,13 @@ _SENSITIVE = "SENSITIVE — never log in cleartext."
 class Donor(TimestampMixin, Base):
     """Registered blood donor.
 
-    Sensitive columns: ``phone``, ``blood_group``, ``location`` (GPS).
+    Sensitive columns: ``phone``, ``blood_group``, ``location`` (GPS WKT).
     """
 
     __tablename__ = "donors"
     __table_args__ = (
         Index("ix_donors_blood_group", "blood_group"),
         Index("ix_donors_city", "city"),
-        Index("ix_donors_location", "location", postgresql_using="gist"),
         {"comment": "Blood donors. phone, blood_group, location are SENSITIVE."},
     )
 
@@ -54,10 +51,10 @@ class Donor(TimestampMixin, Base):
         comment=f"E.164-style phone. {_SENSITIVE}",
     )
     city: Mapped[str] = mapped_column(String(120), nullable=False)
-    location: Mapped[WKBElement | None] = mapped_column(
-        Geography(geometry_type="POINT", srid=4326, spatial_index=False),
+    location: Mapped[str | None] = mapped_column(
+        Text,
         nullable=True,
-        comment=f"Optional GPS (WGS84 geography). {_SENSITIVE}",
+        comment=f"Optional GPS as WKT POINT(lng lat). {_SENSITIVE}",
     )
     is_available: Mapped[bool] = mapped_column(Boolean, nullable=False, default=True)
 

@@ -5,8 +5,6 @@ from __future__ import annotations
 import math
 from typing import NamedTuple
 
-from geoalchemy2.elements import WKTElement
-
 from app.schemas.common import GeoPoint
 
 _EARTH_RADIUS_M = 6_371_000
@@ -17,15 +15,15 @@ class LatLon(NamedTuple):
     longitude: float
 
 
-def geopoint_to_wkt(point: GeoPoint | None) -> WKTElement | None:
-    """Store a WGS84 point as PostGIS geography. Do not log the values."""
+def geopoint_to_wkt(point: GeoPoint | None) -> str | None:
+    """Store a WGS84 point as plain WKT ``POINT(lng lat)``. Do not log the values."""
     if point is None:
         return None
-    return WKTElement(f"POINT({point.longitude} {point.latitude})", srid=4326)
+    return f"POINT({point.longitude} {point.latitude})"
 
 
 def parse_point(value: object) -> LatLon | None:
-    """Best-effort parse of WKT / EWKT / WKTElement. Returns None if GPS is absent."""
+    """Best-effort parse of WKT / EWKT strings. Returns None if GPS is absent."""
     if value is None:
         return None
     text = getattr(value, "data", None)

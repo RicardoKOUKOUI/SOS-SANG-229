@@ -3,9 +3,7 @@
 import uuid
 from typing import TYPE_CHECKING
 
-from geoalchemy2 import Geography
-from geoalchemy2.elements import WKBElement
-from sqlalchemy import Boolean, Index, String, Uuid, text
+from sqlalchemy import Boolean, Index, String, Text, Uuid, text
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.models.base import Base, TimestampMixin
@@ -23,7 +21,6 @@ class Hospital(TimestampMixin, Base):
     __table_args__ = (
         Index("ix_hospitals_city", "city"),
         Index("ix_hospitals_is_recognized", "is_recognized"),
-        Index("ix_hospitals_location", "location", postgresql_using="gist"),
         {
             "comment": (
                 "Hospitals. contact_phone and location are SENSITIVE. "
@@ -39,10 +36,10 @@ class Hospital(TimestampMixin, Base):
     )
     name: Mapped[str] = mapped_column(String(255), nullable=False)
     city: Mapped[str] = mapped_column(String(120), nullable=False)
-    location: Mapped[WKBElement | None] = mapped_column(
-        Geography(geometry_type="POINT", srid=4326, spatial_index=False),
+    location: Mapped[str | None] = mapped_column(
+        Text,
         nullable=True,
-        comment=f"Optional GPS (WGS84 geography). {_SENSITIVE}",
+        comment=f"Optional GPS as WKT POINT(lng lat). {_SENSITIVE}",
     )
     contact_name: Mapped[str | None] = mapped_column(String(255), nullable=True)
     contact_phone: Mapped[str | None] = mapped_column(

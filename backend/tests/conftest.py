@@ -4,9 +4,7 @@ from __future__ import annotations
 
 import pytest
 from fastapi.testclient import TestClient
-from geoalchemy2 import Geography
 from sqlalchemy import create_engine, event
-from sqlalchemy.ext.compiler import compiles
 from sqlalchemy.orm import Session, sessionmaker
 from sqlalchemy.pool import StaticPool
 
@@ -15,21 +13,6 @@ from app.main import app
 from app.models import Base
 
 _POSTGRES_ONLY_DEFAULTS = ("gen_random_uuid()",)
-_SQLITE_GEO_FUNCS = (
-    "ST_GeogFromText",
-    "ST_GeogFromEWKT",
-    "ST_GeomFromEWKT",
-    "ST_GeomFromText",
-    "ST_AsBinary",
-    "AsBinary",
-    "ST_AsEWKB",
-    "ST_AsText",
-)
-
-
-@compiles(Geography, "sqlite")
-def _compile_geography_sqlite(type_, compiler, **kw):  # noqa: ARG001
-    return "TEXT"
 
 
 def _strip_postgres_only_defaults() -> None:
@@ -62,9 +45,6 @@ def db_session() -> Session:
     @event.listens_for(engine, "connect")
     def _configure_sqlite(dbapi_connection, _connection_record):  # noqa: ANN001
         dbapi_connection.execute("PRAGMA foreign_keys=ON")
-        # GeoAlchemy2 still emits PostGIS constructors; store/return WKT text.
-        for name in _SQLITE_GEO_FUNCS:
-            dbapi_connection.create_function(name, 1, lambda value: value)
 
     Base.metadata.create_all(engine)
     factory = sessionmaker(bind=engine, autoflush=False, autocommit=False)

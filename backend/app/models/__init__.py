@@ -1,4 +1,4 @@
-"""ORM models for the MVP schema (PostgreSQL + PostGIS)."""
+"""ORM models for the MVP schema (PostgreSQL; locations as Text WKT)."""
 
 from app.models.base import Base
 from app.models.donation import DonationConfirmation
