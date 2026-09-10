@@ -1,7 +1,8 @@
 """Insert clearly fictional demo rows.
 
 Never logs phone numbers, GPS coordinates, or blood groups.
-Hospitals: several recognized Benin facilities (usable for urgencies) plus one not.
+Hospitals: recognized Benin facilities from app.data.benin_hospitals
+(usable for urgencies) plus one unrecognized demo clinic.
 Re-running upserts hospital flags/names and skips existing urgency rows.
 """
 
@@ -18,6 +19,7 @@ if str(BACKEND_DIR) not in sys.path:
 
 from sqlalchemy import select  # noqa: E402
 
+from app.data.benin_hospitals import BENIN_HOSPITALS  # noqa: E402
 from app.db import get_session_factory  # noqa: E402
 from app.enums import BloodGroup, DonationStatus, MatchMethod, UrgencyStatus  # noqa: E402
 from app.models import (  # noqa: E402
@@ -42,60 +44,6 @@ MATCH_ID = UUID("00000000-0000-4000-8000-000000000021")
 CONFIRM_ID = UUID("00000000-0000-4000-8000-000000000030")
 # Backward-compatible alias used by earlier seed revisions.
 HOSPITAL_ID = RECOGNIZED_HOSPITAL_ID
-
-# Recognized Benin hospitals for the alert dropdown (pitch-ready).
-BENIN_HOSPITALS: list[tuple[UUID, str, str, float, float]] = [
-    # id, name, city, lon, lat
-    (
-        UUID("00000000-0000-4000-8000-000000000010"),
-        "CNHU-HKM Cotonou",
-        "Cotonou",
-        2.4303,
-        6.3569,
-    ),
-    (
-        UUID("00000000-0000-4000-8000-000000000012"),
-        "CHU Mère et Enfant Lagune",
-        "Cotonou",
-        2.4205,
-        6.3602,
-    ),
-    (
-        UUID("00000000-0000-4000-8000-000000000013"),
-        "Hôpital de Zone Abomey-Calavi",
-        "Abomey-Calavi",
-        2.3530,
-        6.4485,
-    ),
-    (
-        UUID("00000000-0000-4000-8000-000000000014"),
-        "CHD Ouémé-Plateau Porto-Novo",
-        "Porto-Novo",
-        2.6283,
-        6.4969,
-    ),
-    (
-        UUID("00000000-0000-4000-8000-000000000015"),
-        "Hôpital de Zone Parakou",
-        "Parakou",
-        2.6300,
-        9.3370,
-    ),
-    (
-        UUID("00000000-0000-4000-8000-000000000016"),
-        "Centre National de Transfusion Sanguine",
-        "Cotonou",
-        2.4250,
-        6.3650,
-    ),
-    (
-        UUID("00000000-0000-4000-8000-000000000017"),
-        "Hôpital de Zone Bohicon",
-        "Bohicon",
-        2.0670,
-        7.1780,
-    ),
-]
 
 
 def _upsert_hospital(
@@ -134,13 +82,13 @@ def main() -> None:
     session = get_session_factory()()
     try:
         recognized_rows: list[Hospital] = []
-        for hospital_id, name, city, lon, lat in BENIN_HOSPITALS:
+        for entry in BENIN_HOSPITALS:
             row = _upsert_hospital(
                 session,
-                hospital_id,
-                name=name,
-                city=city,
-                location=_pt(lon, lat),
+                entry["id"],
+                name=entry["name"],
+                city=entry["city"],
+                location=_pt(entry["lon"], entry["lat"]),
                 is_recognized=True,
             )
             recognized_rows.append(row)
@@ -154,7 +102,10 @@ def main() -> None:
             is_recognized=False,
         )
 
-        primary = recognized_rows[0]
+        primary = next(
+            (r for r in recognized_rows if r.id == RECOGNIZED_HOSPITAL_ID),
+            recognized_rows[0],
+        )
         require_recognized_hospital(primary)
 
         already = session.scalar(
@@ -173,7 +124,8 @@ def main() -> None:
             )
             return
 
-        if session.get(Donor, DONOR_ID) is None:
+        donor = session.get(Donor, DONOR_ID)
+        if donor is None:
             session.add(
                 Donor(
                     id=DONOR_ID,
@@ -185,6 +137,10 @@ def main() -> None:
                     is_available=True,
                 )
             )
+        else:
+            # Ensure demo donor uses Benin 01… national format.
+            if not str(donor.phone or "").startswith("01"):
+                donor.phone = "0190000001"
 
         session.add(
             UrgencyRequest(
@@ -233,5 +189,6 @@ if __name__ == "__main__":
         main()
     except Exception:
         import traceback
+
         traceback.print_exc()
         raise

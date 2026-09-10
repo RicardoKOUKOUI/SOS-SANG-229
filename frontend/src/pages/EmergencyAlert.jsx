@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import BloodGroupSelect from "../components/BloodGroupSelect.jsx";
+import HospitalSearch from "../components/HospitalSearch.jsx";
 import PageFrame from "../components/PageFrame.jsx";
 import PageHeader from "../components/PageHeader.jsx";
 import UrgencyBadge from "../components/UrgencyBadge.jsx";
@@ -62,6 +63,10 @@ export default function EmergencyAlert({ onToast }) {
     return (event) => {
       setForm((current) => ({ ...current, [field]: event.target.value }));
     };
+  }
+
+  function setHospitalId(id) {
+    setForm((current) => ({ ...current, hospital: id || "" }));
   }
 
   async function handleSubmit(event) {
@@ -147,25 +152,17 @@ export default function EmergencyAlert({ onToast }) {
                 (liste officielle, requis)
               </span>
             </label>
-            <select
+            <HospitalSearch
               id="hospital"
-              className="field-input"
+              hospitals={hospitalOptions}
               value={form.hospital}
-              onChange={update("hospital")}
+              onChange={setHospitalId}
               required
-            >
-              <option value="">Choisir un établissement reconnu</option>
-              {hospitalOptions.map((hospital) => (
-                <option key={hospital.id} value={hospital.id}>
-                  {hospital.name}
-                  {hospital.city ? ` — ${hospital.city}` : ""}
-                </option>
-              ))}
-            </select>
+            />
             <p className="field-hint">
-              Seules les structures reconnues par l’État peuvent être choisies —
-              pour que le don arrive au bon endroit. La saisie libre d’un
-              centre non listé n’est pas autorisée.
+              Tapez pour rechercher parmi les structures reconnues (CNHU, CHU,
+              CHD, hôpitaux de zone). La saisie libre d’un centre non listé
+              n’est pas autorisée.
               {hospitalsError
                 ? ` API indisponible (${hospitalsError}) — liste de secours affichée, envoi désactivé.`
                 : ""}
