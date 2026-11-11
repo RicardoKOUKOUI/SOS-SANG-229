@@ -29,6 +29,13 @@ class ModelMetadataTests(unittest.TestCase):
                 "follows",
                 "post_likes",
                 "post_comments",
+                "conversations",
+                "conversation_members",
+                "direct_messages",
+                "communities",
+                "community_members",
+                "community_rooms",
+                "community_messages",
             },
         )
 

@@ -6,10 +6,12 @@ from app.matching import DEFAULT_RADIUS_METERS
 from app.routers import (
     alerts,
     auth,
+    communities,
     donations,
     donors,
     health,
     hospitals,
+    messaging,
     posts,
     social,
     tracking,
@@ -44,13 +46,16 @@ app = FastAPI(
         "- follow/unfollow + followers/following\n"
         "- `GET /explore/search?q=`\n"
         "Media upload: not enabled (text-only).\n\n"
+        "## DOXAMI messaging & communities (Phase 4)\n"
+        "- `/messages/threads*` — 1:1 + group text (polling, no WebRTC)\n"
+        "- `/communities*` — public communities, rooms, text chat\n\n"
         "## Legacy SOS Sang\n"
         f"Matching radius default **{DEFAULT_RADIUS_METERS} m**. "
         "Twilio SMS: stub. JWT required for DOXAMI routes only; "
         "legacy blood endpoints remain open for the hackathon demo.\n\n"
         "Never log emails, phones, passwords, GPS, or blood groups in cleartext."
     ),
-    version="0.4.0",
+    version="0.5.0",
 )
 
 app.add_middleware(
@@ -66,6 +71,8 @@ app.include_router(auth.router)
 app.include_router(users.router)
 app.include_router(posts.router)
 app.include_router(social.router)
+app.include_router(messaging.router)
+app.include_router(communities.router)
 app.include_router(hospitals.router)
 app.include_router(donors.router)
 app.include_router(alerts.router)
@@ -90,6 +97,8 @@ def root():
             "/users/{username}",
             "/posts",
             "/explore/search",
+            "/messages/threads",
+            "/communities",
             "/hospitals",
             "/hospitals/recognized",
             "/donors",
