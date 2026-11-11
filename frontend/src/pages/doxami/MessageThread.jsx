@@ -3,10 +3,13 @@ import { Link, useParams } from "react-router-dom";
 import { getThread, listThreadMessages, sendThreadMessage } from "../../api/messaging.js";
 import RequireAuth from "../../components/RequireAuth.jsx";
 import { useAuth } from "../../auth/AuthContext.jsx";
+import { useOffline } from "../../offline/OfflineContext.jsx";
+import { enqueueOutboxItem } from "../../offline/outbox.js";
 
 function ThreadInner({ onToast }) {
   const { threadId } = useParams();
   const { token, user } = useAuth();
+  const { online, refreshPending, dataSaver } = useOffline();
   const [thread, setThread] = useState(null);
   const [messages, setMessages] = useState([]);
   const [body, setBody] = useState("");
@@ -34,24 +37,45 @@ function ThreadInner({ onToast }) {
     }
     load();
     const timer = setInterval(() => {
+      if (!navigator.onLine) return;
       reload().catch(() => {});
-    }, 5000);
+    }, dataSaver ? 15000 : 5000);
     return () => {
       cancelled = true;
       clearInterval(timer);
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [threadId, token]);
+  }, [threadId, token, dataSaver]);
 
   async function onSubmit(event) {
     event.preventDefault();
     setBusy(true);
     try {
+      if (!online) {
+        await enqueueOutboxItem({
+          type: "thread_message",
+          payload: { threadId, body: body.trim() },
+        });
+        await refreshPending();
+        setBody("");
+        onToast?.("Hors ligne — message mis en file.");
+        return;
+      }
       await sendThreadMessage(token, threadId, body);
       setBody("");
       await reload();
     } catch (err) {
-      onToast?.(err.message || "Envoi impossible.");
+      if (!navigator.onLine || /Failed to fetch|NetworkError/i.test(err.message || "")) {
+        await enqueueOutboxItem({
+          type: "thread_message",
+          payload: { threadId, body: body.trim() },
+        });
+        await refreshPending();
+        setBody("");
+        onToast?.("Réseau indisponible — message mis en file.");
+      } else {
+        onToast?.(err.message || "Envoi impossible.");
+      }
     } finally {
       setBusy(false);
     }

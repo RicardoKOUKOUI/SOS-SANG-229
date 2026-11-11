@@ -9,10 +9,13 @@ import {
   sendRoomMessage,
 } from "../../api/messaging.js";
 import { useAuth } from "../../auth/AuthContext.jsx";
+import { useOffline } from "../../offline/OfflineContext.jsx";
+import { enqueueOutboxItem } from "../../offline/outbox.js";
 
 export default function CommunityDetail({ onToast }) {
   const { communityId } = useParams();
   const { token, isAuthenticated } = useAuth();
+  const { online, refreshPending, dataSaver } = useOffline();
   const [community, setCommunity] = useState(null);
   const [members, setMembers] = useState([]);
   const [rooms, setRooms] = useState([]);
@@ -61,12 +64,15 @@ export default function CommunityDetail({ onToast }) {
       }
     }
     loadMessages();
-    const timer = setInterval(loadMessages, 5000);
+    const timer = setInterval(() => {
+      if (!navigator.onLine) return;
+      loadMessages();
+    }, dataSaver ? 15000 : 5000);
     return () => {
       cancelled = true;
       clearInterval(timer);
     };
-  }, [activeRoom, token, communityId, community?.is_member]);
+  }, [activeRoom, token, communityId, community?.is_member, dataSaver]);
 
   async function onJoin() {
     if (!token) {
@@ -90,12 +96,40 @@ export default function CommunityDetail({ onToast }) {
     if (!activeRoom) return;
     setBusy(true);
     try {
+      if (!online) {
+        await enqueueOutboxItem({
+          type: "room_message",
+          payload: {
+            communityId,
+            roomId: activeRoom.id,
+            body: body.trim(),
+          },
+        });
+        await refreshPending();
+        setBody("");
+        onToast?.("Hors ligne — message salon mis en file.");
+        return;
+      }
       await sendRoomMessage(token, communityId, activeRoom.id, body);
       setBody("");
       const data = await listRoomMessages(token, communityId, activeRoom.id);
       setMessages(data);
     } catch (err) {
-      onToast?.(err.message || "Message impossible.");
+      if (!navigator.onLine || /Failed to fetch|NetworkError/i.test(err.message || "")) {
+        await enqueueOutboxItem({
+          type: "room_message",
+          payload: {
+            communityId,
+            roomId: activeRoom.id,
+            body: body.trim(),
+          },
+        });
+        await refreshPending();
+        setBody("");
+        onToast?.("Réseau indisponible — message salon mis en file.");
+      } else {
+        onToast?.(err.message || "Message impossible.");
+      }
     } finally {
       setBusy(false);
     }
