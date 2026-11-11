@@ -5,8 +5,17 @@ import OfflineBanners from "./components/OfflineBanners.jsx";
 import Toast from "./components/Toast.jsx";
 import useToast from "./hooks/useToast.js";
 import { OfflineProvider } from "./offline/OfflineContext.jsx";
+import ActionBoard from "./pages/doxami/ActionBoard.jsx";
+import ActionDetail from "./pages/doxami/ActionDetail.jsx";
+import ActionOverview from "./pages/doxami/ActionOverview.jsx";
+import ActionProgress from "./pages/doxami/ActionProgress.jsx";
+import ActionTasks from "./pages/doxami/ActionTasks.jsx";
+import ActionTeam from "./pages/doxami/ActionTeam.jsx";
+import ActionsHome from "./pages/doxami/ActionsHome.jsx";
+import ActionsNew from "./pages/doxami/ActionsNew.jsx";
 import AiHub from "./pages/doxami/AiHub.jsx";
 import Communities from "./pages/doxami/Communities.jsx";
+import PostToAction from "./pages/doxami/PostToAction.jsx";
 import CommunityDetail from "./pages/doxami/CommunityDetail.jsx";
 import CommunityMembers from "./pages/doxami/CommunityMembers.jsx";
 import CommunityNew from "./pages/doxami/CommunityNew.jsx";
@@ -211,12 +220,18 @@ export default function App() {
             element={<PlaceholderModule code="HUB-PRO" title="Professional" />}
           />
           <Route path="/hub/mesh" element={<MeshHub />} />
-          <Route
-            path="/hub/actions"
-            element={<PlaceholderModule code="HUB-ACTIONS" title="Actions" />}
-          />
+          <Route path="/hub/actions" element={<ActionsHome />} />
+          <Route path="/hub/actions/new" element={<ActionsNew onToast={toast.show} />} />
+          <Route path="/hub/actions/:actionId" element={<ActionDetail />}>
+            <Route index element={<ActionOverview />} />
+            <Route path="board" element={<ActionBoard onToast={toast.show} />} />
+            <Route path="tasks" element={<ActionTasks onToast={toast.show} />} />
+            <Route path="team" element={<ActionTeam onToast={toast.show} />} />
+            <Route path="progress" element={<ActionProgress onToast={toast.show} />} />
+          </Route>
           <Route path="/explore" element={<Explore onToast={toast.show} />} />
           <Route path="/create" element={<CreatePost onToast={toast.show} />} />
+          <Route path="/posts/:postId/to-action" element={<PostToAction onToast={toast.show} />} />
           <Route path="/messages" element={<MessagesInbox onToast={toast.show} />} />
           <Route path="/messages/new" element={<MessageNew onToast={toast.show} />} />
           <Route path="/messages/:threadId" element={<MessageThread onToast={toast.show} />} />
