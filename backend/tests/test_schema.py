@@ -40,6 +40,8 @@ class ModelMetadataTests(unittest.TestCase):
                 "action_projects",
                 "action_tasks",
                 "action_members",
+                "creator_profiles",
+                "feature_flags",
             },
         )
 

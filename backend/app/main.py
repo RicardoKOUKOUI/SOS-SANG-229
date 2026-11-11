@@ -9,6 +9,7 @@ from app.routers import (
     alerts,
     auth,
     communities,
+    creator,
     donations,
     donors,
     events,
@@ -63,13 +64,17 @@ app = FastAPI(
         "- Meet/Live remain UI placeholders without WebRTC infra\n\n"
         "## DOXAMI ACTIONS (Phase 8)\n"
         "- `/actions` — projects, tasks (todo/doing/done), team, progress réel\n\n"
+        "## DOXAMI creators (Phase 9)\n"
+        "- `/creator/me` — studio profile\n"
+        "- `/monetization/status` — ads/premium flags; payouts_ready stays false\n"
+        "- checkout and payouts return 503 (no PSP adapter, earnings 0)\n\n"
         "## Legacy SOS Sang\n"
         f"Matching radius default **{DEFAULT_RADIUS_METERS} m**. "
         "Twilio SMS: stub. JWT required for DOXAMI routes only; "
         "legacy blood endpoints remain open for the hackathon demo.\n\n"
         "Never log emails, phones, passwords, GPS, or blood groups in cleartext."
     ),
-    version="0.8.0",
+    version="0.9.0",
 )
 
 app.add_middleware(
@@ -91,6 +96,7 @@ app.include_router(mesh.router)
 app.include_router(events.router)
 app.include_router(ai.router)
 app.include_router(actions.router)
+app.include_router(creator.router)
 app.include_router(hospitals.router)
 app.include_router(donors.router)
 app.include_router(alerts.router)
@@ -121,6 +127,8 @@ def root():
             "/events",
             "/ai/status",
             "/actions",
+            "/creator/me",
+            "/monetization/status",
             "/hospitals",
             "/hospitals/recognized",
             "/donors",

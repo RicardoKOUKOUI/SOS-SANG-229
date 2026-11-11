@@ -11,7 +11,7 @@ const tiles = [
   { to: "/hub/marketplace", label: "Marketplace", status: "non activé" },
   { to: "/hub/events", label: "Events", status: "opérationnel (DB)" },
   { to: "/hub/work", label: "Work", status: "non activé" },
-  { to: "/hub/creator", label: "Creator Studio", status: "non activé" },
+  { to: "/hub/creator", label: "Creator Studio", status: "profil réel · pas de payout" },
   { to: "/hub/professional", label: "Professional", status: "non activé" },
   { to: "/hub/mesh", label: "MESH", status: "statut réel (pas de faux P2P)" },
   { to: "/hub/actions", label: "Actions", status: "opérationnel (projets / kanban)" },
