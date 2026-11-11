@@ -5,11 +5,13 @@ import OfflineBanners from "./components/OfflineBanners.jsx";
 import Toast from "./components/Toast.jsx";
 import useToast from "./hooks/useToast.js";
 import { OfflineProvider } from "./offline/OfflineContext.jsx";
+import AiHub from "./pages/doxami/AiHub.jsx";
 import Communities from "./pages/doxami/Communities.jsx";
 import CommunityDetail from "./pages/doxami/CommunityDetail.jsx";
 import CommunityMembers from "./pages/doxami/CommunityMembers.jsx";
 import CommunityNew from "./pages/doxami/CommunityNew.jsx";
 import CreatePost from "./pages/doxami/CreatePost.jsx";
+import EventsHub from "./pages/doxami/EventsHub.jsx";
 import Explore from "./pages/doxami/Explore.jsx";
 import FollowList from "./pages/doxami/FollowList.jsx";
 import HomeFeed from "./pages/doxami/HomeFeed.jsx";
@@ -164,26 +166,41 @@ export default function App() {
             path="/hub/music"
             element={<PlaceholderModule code="HUB-MUSIC" title="Music" />}
           />
-          <Route path="/hub/meet" element={<PlaceholderModule code="HUB-MEET" title="Meet" />} />
+          <Route
+            path="/hub/meet"
+            element={
+              <PlaceholderModule
+                code="HUB-MEET"
+                title="Meet"
+                body="WebRTC/SFU non déployé — aucun appel simulé."
+              />
+            }
+          />
           <Route path="/hub/pay" element={<PlaceholderModule code="HUB-PAY" title="Pay" />} />
           <Route
             path="/hub/watch"
             element={<PlaceholderModule code="HUB-WATCH" title="Watch" />}
           />
-          <Route path="/hub/live" element={<PlaceholderModule code="HUB-LIVE" title="Live" />} />
+          <Route
+            path="/hub/live"
+            element={
+              <PlaceholderModule
+                code="HUB-LIVE"
+                title="Live"
+                body="Infra Live/SFU absente — pas de faux live."
+              />
+            }
+          />
           <Route
             path="/hub/games"
             element={<PlaceholderModule code="HUB-GAMES" title="Games" />}
           />
-          <Route path="/hub/ai" element={<PlaceholderModule code="HUB-AI" title="AI" />} />
+          <Route path="/hub/ai" element={<AiHub onToast={toast.show} />} />
           <Route
             path="/hub/marketplace"
             element={<PlaceholderModule code="HUB-MARKET" title="Marketplace" />}
           />
-          <Route
-            path="/hub/events"
-            element={<PlaceholderModule code="HUB-EVENTS" title="Events" />}
-          />
+          <Route path="/hub/events" element={<EventsHub onToast={toast.show} />} />
           <Route path="/hub/work" element={<PlaceholderModule code="HUB-WORK" title="Work" />} />
           <Route
             path="/hub/creator"
