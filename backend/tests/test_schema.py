@@ -42,6 +42,9 @@ class ModelMetadataTests(unittest.TestCase):
                 "action_members",
                 "creator_profiles",
                 "feature_flags",
+                "professional_profiles",
+                "job_listings",
+                "market_listings",
             },
         )
 

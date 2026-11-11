@@ -28,7 +28,12 @@ import FollowList from "./pages/doxami/FollowList.jsx";
 import HomeFeed from "./pages/doxami/HomeFeed.jsx";
 import Hub from "./pages/doxami/Hub.jsx";
 import LegacySangHome from "./pages/doxami/LegacySangHome.jsx";
+import MarketDetail from "./pages/doxami/MarketDetail.jsx";
+import MarketHub from "./pages/doxami/MarketHub.jsx";
 import MeshHub from "./pages/doxami/MeshHub.jsx";
+import ProfessionalHub from "./pages/doxami/ProfessionalHub.jsx";
+import WorkDetail from "./pages/doxami/WorkDetail.jsx";
+import WorkHub from "./pages/doxami/WorkHub.jsx";
 import MessageInfo from "./pages/doxami/MessageInfo.jsx";
 import MessageNew from "./pages/doxami/MessageNew.jsx";
 import MessageThread from "./pages/doxami/MessageThread.jsx";
@@ -207,21 +212,20 @@ export default function App() {
             element={<PlaceholderModule code="HUB-GAMES" title="Games" />}
           />
           <Route path="/hub/ai" element={<AiHub onToast={toast.show} />} />
+          <Route path="/hub/marketplace" element={<MarketHub onToast={toast.show} />} />
           <Route
-            path="/hub/marketplace"
-            element={<PlaceholderModule code="HUB-MARKET" title="Marketplace" />}
+            path="/hub/marketplace/:listingId"
+            element={<MarketDetail onToast={toast.show} />}
           />
           <Route path="/hub/events" element={<EventsHub onToast={toast.show} />} />
-          <Route path="/hub/work" element={<PlaceholderModule code="HUB-WORK" title="Work" />} />
+          <Route path="/hub/work" element={<WorkHub onToast={toast.show} />} />
+          <Route path="/hub/work/:jobId" element={<WorkDetail />} />
           <Route path="/hub/creator" element={<CreatorHub onToast={toast.show} />} />
           <Route
             path="/hub/creator/monetization"
             element={<CreatorMonetization onToast={toast.show} />}
           />
-          <Route
-            path="/hub/professional"
-            element={<PlaceholderModule code="HUB-PRO" title="Professional" />}
-          />
+          <Route path="/hub/professional" element={<ProfessionalHub onToast={toast.show} />} />
           <Route path="/hub/mesh" element={<MeshHub />} />
           <Route path="/hub/actions" element={<ActionsHome />} />
           <Route path="/hub/actions/new" element={<ActionsNew onToast={toast.show} />} />
