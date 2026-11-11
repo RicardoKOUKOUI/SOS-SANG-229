@@ -51,6 +51,11 @@ export function AuthProvider({ children }) {
     return result;
   }
 
+  function applyToken(accessToken) {
+    localStorage.setItem(TOKEN_KEY, accessToken);
+    setToken(accessToken);
+  }
+
   async function logout() {
     if (token) {
       try {
@@ -72,6 +77,7 @@ export function AuthProvider({ children }) {
     register,
     login,
     logout,
+    applyToken,
     setUser,
   };
 

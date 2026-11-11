@@ -45,6 +45,7 @@ class ModelMetadataTests(unittest.TestCase):
                 "professional_profiles",
                 "job_listings",
                 "market_listings",
+                "admin_audit_logs",
             },
         )
 

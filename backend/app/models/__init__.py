@@ -1,5 +1,6 @@
 """ORM models (DOXAMI users + legacy SOS Sang schema)."""
 
+from app.models.admin import AdminAuditLog
 from app.models.base import Base
 from app.models.donation import DonationConfirmation
 from app.models.donor import Donor
@@ -26,6 +27,7 @@ __all__ = [
     "ActionMember",
     "ActionProject",
     "ActionTask",
+    "AdminAuditLog",
     "Base",
     "Community",
     "CommunityMember",

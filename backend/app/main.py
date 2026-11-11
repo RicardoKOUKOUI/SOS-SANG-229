@@ -5,6 +5,7 @@ from app.config import get_settings
 from app.matching import DEFAULT_RADIUS_METERS
 from app.routers import (
     actions,
+    admin,
     ai,
     alerts,
     auth,
@@ -72,13 +73,17 @@ app = FastAPI(
         "## DOXAMI professional & marketplace (Phase 10)\n"
         "- `/professional/me`, `/professionals`, `/jobs`, `/marketplace`\n"
         "- listing checkout returns 503 (Pay is not active; price is display-only)\n\n"
+        "## DOXAMI admin (Phase 11)\n"
+        "- `/admin/*` requires role=admin and a TOTP-backed token (`mfa` claim)\n"
+        "- moderation covers public posts only (no private messages)\n"
+        "- bootstrap stays 503 until DOXAMI_ADMIN_BOOTSTRAP_TOKEN is set\n\n"
         "## Legacy SOS Sang\n"
         f"Matching radius default **{DEFAULT_RADIUS_METERS} m**. "
         "Twilio SMS: stub. JWT required for DOXAMI routes only; "
         "legacy blood endpoints remain open for the hackathon demo.\n\n"
         "Never log emails, phones, passwords, GPS, or blood groups in cleartext."
     ),
-    version="0.10.0",
+    version="0.11.0",
 )
 
 app.add_middleware(
@@ -102,6 +107,7 @@ app.include_router(ai.router)
 app.include_router(actions.router)
 app.include_router(creator.router)
 app.include_router(listings.router)
+app.include_router(admin.router)
 app.include_router(hospitals.router)
 app.include_router(donors.router)
 app.include_router(alerts.router)
@@ -137,6 +143,7 @@ def root():
             "/professionals",
             "/jobs",
             "/marketplace",
+            "/admin/dashboard",
             "/hospitals",
             "/hospitals/recognized",
             "/donors",

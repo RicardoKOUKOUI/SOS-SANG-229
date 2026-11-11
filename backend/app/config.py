@@ -38,6 +38,9 @@ class Settings(BaseSettings):
     # A key alone does not enable transfers — no adapter is shipped.
     doxami_psp_api_key: str = ""
 
+    # One-time admin promotion. Empty = bootstrap endpoint stays unavailable.
+    doxami_admin_bootstrap_token: str = ""
+
 
 @lru_cache
 def get_settings() -> Settings:

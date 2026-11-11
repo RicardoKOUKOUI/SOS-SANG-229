@@ -130,7 +130,7 @@ def explore_search(
     posts = db.scalars(
         select(Post)
         .options(selectinload(Post.author))
-        .where(Post.body.ilike(term))
+        .where(Post.hidden.is_(False), Post.body.ilike(term))
         .order_by(Post.created_at.desc())
         .limit(20)
     ).all()
