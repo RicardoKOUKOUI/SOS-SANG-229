@@ -3,15 +3,18 @@ import { Link } from "react-router-dom";
 import { listThreads } from "../../api/messaging.js";
 import RequireAuth from "../../components/RequireAuth.jsx";
 import { useAuth } from "../../auth/AuthContext.jsx";
+import { useOffline } from "../../offline/OfflineContext.jsx";
 
 function InboxInner({ onToast }) {
   const { token, user } = useAuth();
+  const { dataSaver } = useOffline();
   const [threads, setThreads] = useState([]);
   const [error, setError] = useState("");
 
   useEffect(() => {
     let cancelled = false;
     async function load() {
+      if (!navigator.onLine) return;
       try {
         const data = await listThreads(token);
         if (!cancelled) setThreads(data);
@@ -20,12 +23,12 @@ function InboxInner({ onToast }) {
       }
     }
     load();
-    const timer = setInterval(load, 8000);
+    const timer = setInterval(load, dataSaver ? 20000 : 8000);
     return () => {
       cancelled = true;
       clearInterval(timer);
     };
-  }, [token]);
+  }, [token, dataSaver]);
 
   function threadLabel(thread) {
     if (thread.kind === "group") return thread.title || "Groupe";

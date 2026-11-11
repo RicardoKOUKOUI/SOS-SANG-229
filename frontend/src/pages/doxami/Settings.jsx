@@ -20,6 +20,12 @@ function SettingsInner() {
           </Link>
         </li>
         <li>
+          <Link to="/settings/data" className="card block hover:border-primary/40">
+            <span className="font-semibold">Données & offline</span>
+            <p className="mt-1 text-sm text-accent">Économie de données + sync IndexedDB.</p>
+          </Link>
+        </li>
+        <li>
           <Link to="/profile/edit" className="card block hover:border-primary/40">
             <span className="font-semibold">Profil</span>
             <p className="mt-1 text-sm text-accent">Nom affiché et bio.</p>

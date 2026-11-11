@@ -1,8 +1,10 @@
 import { useState } from "react";
 import { NavLink, Route, Routes } from "react-router-dom";
 import BrandMark from "./components/BrandMark.jsx";
+import OfflineBanners from "./components/OfflineBanners.jsx";
 import Toast from "./components/Toast.jsx";
 import useToast from "./hooks/useToast.js";
+import { OfflineProvider } from "./offline/OfflineContext.jsx";
 import Communities from "./pages/doxami/Communities.jsx";
 import CommunityDetail from "./pages/doxami/CommunityDetail.jsx";
 import CommunityMembers from "./pages/doxami/CommunityMembers.jsx";
@@ -23,6 +25,7 @@ import Profile from "./pages/doxami/Profile.jsx";
 import ProfileEdit from "./pages/doxami/ProfileEdit.jsx";
 import PublicProfile from "./pages/doxami/PublicProfile.jsx";
 import Settings from "./pages/doxami/Settings.jsx";
+import SettingsData from "./pages/doxami/SettingsData.jsx";
 import SettingsLanguage from "./pages/doxami/SettingsLanguage.jsx";
 import SettingsPrivacy from "./pages/doxami/SettingsPrivacy.jsx";
 import ForgotPassword from "./pages/doxami/auth/ForgotPassword.jsx";
@@ -55,6 +58,7 @@ export default function App() {
   const [menuOpen, setMenuOpen] = useState(false);
 
   return (
+    <OfflineProvider onToast={toast.show}>
     <div className="flex min-h-dvh flex-col bg-paper">
       <a
         href="#contenu"
@@ -62,6 +66,8 @@ export default function App() {
       >
         Aller au contenu
       </a>
+
+      <OfflineBanners />
 
       <header className="sticky top-0 z-30 border-b border-light/80 bg-paper/85 backdrop-blur-md">
         <div className="mx-auto flex max-w-5xl items-center justify-between gap-4 px-4 py-3 sm:px-6 lg:px-8">
@@ -151,6 +157,7 @@ export default function App() {
           <Route path="/settings" element={<Settings />} />
           <Route path="/settings/privacy" element={<SettingsPrivacy />} />
           <Route path="/settings/language" element={<SettingsLanguage />} />
+          <Route path="/settings/data" element={<SettingsData />} />
           <Route path="/hub" element={<Hub />} />
           <Route
             path="/hub/music"
@@ -267,5 +274,6 @@ export default function App() {
 
       <Toast message={toast.message} onDismiss={toast.dismiss} />
     </div>
+    </OfflineProvider>
   );
 }
