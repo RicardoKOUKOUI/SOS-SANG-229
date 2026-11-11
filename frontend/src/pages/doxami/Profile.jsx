@@ -25,6 +25,15 @@ function ProfileInner() {
         <Link to="/profile/edit" className="btn-primary">
           Éditer le profil
         </Link>
+        <Link to={`/u/${user.username}/followers`} className="btn-secondary">
+          Abonnés
+        </Link>
+        <Link to={`/u/${user.username}/following`} className="btn-secondary">
+          Abonnements
+        </Link>
+        <Link to="/create" className="btn-secondary">
+          Créer
+        </Link>
         <Link to="/settings" className="btn-secondary">
           Paramètres
         </Link>

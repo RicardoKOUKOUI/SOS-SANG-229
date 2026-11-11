@@ -25,6 +25,10 @@ class ModelMetadataTests(unittest.TestCase):
                 "donation_confirmations",
                 "urgency_matches",
                 "users",
+                "posts",
+                "follows",
+                "post_likes",
+                "post_comments",
             },
         )
 

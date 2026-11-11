@@ -3,7 +3,18 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from app.config import get_settings
 from app.matching import DEFAULT_RADIUS_METERS
-from app.routers import alerts, auth, donations, donors, health, hospitals, tracking, users
+from app.routers import (
+    alerts,
+    auth,
+    donations,
+    donors,
+    health,
+    hospitals,
+    posts,
+    social,
+    tracking,
+    users,
+)
 
 settings = get_settings()
 _cors_origins = [
@@ -27,13 +38,19 @@ app = FastAPI(
         "- `POST /auth/logout` — client discard (stateless)\n"
         "- `PATCH /users/me` — update profile\n"
         "- `GET /users/{username}` — public profile\n\n"
+        "## DOXAMI social light (Phase 3)\n"
+        "- `POST/GET /posts`, `GET /posts/{id}`\n"
+        "- likes + comments on posts\n"
+        "- follow/unfollow + followers/following\n"
+        "- `GET /explore/search?q=`\n"
+        "Media upload: not enabled (text-only).\n\n"
         "## Legacy SOS Sang\n"
         f"Matching radius default **{DEFAULT_RADIUS_METERS} m**. "
         "Twilio SMS: stub. JWT required for DOXAMI routes only; "
         "legacy blood endpoints remain open for the hackathon demo.\n\n"
         "Never log emails, phones, passwords, GPS, or blood groups in cleartext."
     ),
-    version="0.3.0",
+    version="0.4.0",
 )
 
 app.add_middleware(
@@ -47,6 +64,8 @@ app.add_middleware(
 app.include_router(health.router)
 app.include_router(auth.router)
 app.include_router(users.router)
+app.include_router(posts.router)
+app.include_router(social.router)
 app.include_router(hospitals.router)
 app.include_router(donors.router)
 app.include_router(alerts.router)
@@ -69,6 +88,8 @@ def root():
             "/auth/logout",
             "/users/me",
             "/users/{username}",
+            "/posts",
+            "/explore/search",
             "/hospitals",
             "/hospitals/recognized",
             "/donors",

@@ -14,15 +14,17 @@ def test_alembic_single_head_linear_chain() -> None:
     script = ScriptDirectory.from_config(config)
 
     heads = script.get_heads()
-    assert heads == ["004_users"]
+    assert heads == ["005_social_light"]
 
     chain = [revision.revision for revision in script.walk_revisions()]
     assert chain == [
+        "005_social_light",
         "004_users",
         "003_urgency_matches",
         "002_hospital_recognized",
         "001_mvp_schema",
     ]
+    assert script.get_revision("005_social_light").down_revision == "004_users"
     assert script.get_revision("004_users").down_revision == "003_urgency_matches"
     assert script.get_revision("003_urgency_matches").down_revision == (
         "002_hospital_recognized"
