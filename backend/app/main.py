@@ -82,13 +82,17 @@ app = FastAPI(
         "- security headers; auth/admin responses are `Cache-Control: no-store`\n"
         "- list endpoints stay capped (low bandwidth)\n"
         "- MESH cannot be forced ready by a query flag\n\n"
+        "## Deploy (Phase 13)\n"
+        "- `GET /health` liveness (no database)\n"
+        "- `GET /health/ready` checks the database (503 if unset)\n"
+        "- `SEED_DEMO=1` runs the fictional seed after migrations\n\n"
         "## Legacy SOS Sang\n"
         f"Matching radius default **{DEFAULT_RADIUS_METERS} m**. "
         "Twilio SMS: stub. JWT required for DOXAMI routes only; "
         "legacy blood endpoints remain open for the hackathon demo.\n\n"
         "Never log emails, phones, passwords, GPS, or blood groups in cleartext."
     ),
-    version="0.12.0",
+    version="0.13.0",
 )
 
 app.add_middleware(
@@ -130,6 +134,7 @@ def root():
         "health": "/health",
         "endpoints": [
             "/health",
+            "/health/ready",
             "/auth/register",
             "/auth/login",
             "/auth/me",

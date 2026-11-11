@@ -1,6 +1,8 @@
 # DOXAMI (stack issue de SOS Sang 229)
 
-Écosystème DOXAMI en construction (**Phase 12 — tests and hardening**) sur le dépôt hackathon **SOS Sang 229** (Option A : évoluer en place, démo sang préservée sous `/legacy/sang`).
+Écosystème DOXAMI en construction (**Phase 13 — déploiement documenté, API Railway pas encore joignable**) sur le dépôt hackathon **SOS Sang 229** (Option A : évoluer en place, démo sang préservée sous `/legacy/sang`).
+
+Runbook : [docs/deploy.md](docs/deploy.md). `GET /health` = processus, `GET /health/ready` = base. Le rewrite Vercel actuel ne joint pas une API (Railway répond « Application not found »).
 
 | Couche | Stack | Statut Phase 2 |
 | --- | --- | --- |

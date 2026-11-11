@@ -1,8 +1,14 @@
-# Prefer setting Root Directory = backend in Railway service settings.
-# This file documents the API service expectations.
+# API image is built from backend/Dockerfile (build context = the backend folder).
+# In the Railway service, set Root Directory to `backend` so backend/railway.toml
+# is the file Railway reads. This root file matches that start command for a
+# service whose image WORKDIR is /app. It does not `cd backend` inside the image.
+
 [build]
 builder = "DOCKERFILE"
 dockerfilePath = "backend/Dockerfile"
 
 [deploy]
-startCommand = "cd backend && uvicorn app.main:app --host 0.0.0.0 --port $PORT"
+startCommand = "sh -c 'alembic upgrade head && if [ \"${SEED_DEMO:-0}\" = \"1\" ]; then python scripts/seed_demo.py; fi && uvicorn app.main:app --host 0.0.0.0 --port ${PORT:-8000}'"
+healthcheckPath = "/health/ready"
+healthcheckTimeout = 100
+restartPolicyType = "ON_FAILURE"

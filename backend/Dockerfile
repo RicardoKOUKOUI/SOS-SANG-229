@@ -15,4 +15,4 @@ ENV PYTHONUNBUFFERED=1
 EXPOSE 8000
 
 # Shell form so $PORT expands on Railway
-CMD ["sh", "-c", "alembic upgrade head && python scripts/seed_demo.py && uvicorn app.main:app --host 0.0.0.0 --port ${PORT:-8000}"]
+CMD ["sh", "-c", "alembic upgrade head && if [ \"${SEED_DEMO:-0}\" = \"1\" ]; then python scripts/seed_demo.py; fi && uvicorn app.main:app --host 0.0.0.0 --port ${PORT:-8000}"]
