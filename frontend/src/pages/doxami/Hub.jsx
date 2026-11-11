@@ -2,14 +2,14 @@ import { Link } from "react-router-dom";
 
 const tiles = [
   { to: "/hub/music", label: "Music", status: "non activé" },
-  { to: "/hub/meet", label: "Meet", status: "non activé" },
+  { to: "/hub/meet", label: "Meet", status: "placeholder (WebRTC requis)" },
   { to: "/hub/pay", label: "Pay", status: "non activé" },
   { to: "/hub/watch", label: "Watch", status: "non activé" },
-  { to: "/hub/live", label: "Live", status: "non activé" },
+  { to: "/hub/live", label: "Live", status: "placeholder (SFU requis)" },
   { to: "/hub/games", label: "Games", status: "non activé" },
-  { to: "/hub/ai", label: "AI", status: "non activé" },
+  { to: "/hub/ai", label: "AI", status: "ready-to-wire / clé optionnelle" },
   { to: "/hub/marketplace", label: "Marketplace", status: "non activé" },
-  { to: "/hub/events", label: "Events", status: "non activé" },
+  { to: "/hub/events", label: "Events", status: "opérationnel (DB)" },
   { to: "/hub/work", label: "Work", status: "non activé" },
   { to: "/hub/creator", label: "Creator Studio", status: "non activé" },
   { to: "/hub/professional", label: "Professional", status: "non activé" },

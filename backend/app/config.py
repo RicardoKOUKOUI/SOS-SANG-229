@@ -29,6 +29,11 @@ class Settings(BaseSettings):
     jwt_algorithm: str = "HS256"
     access_token_expire_minutes: int = 60
 
+    # Optional AI provider (Phase 7). Empty = not configured (honest unavailable).
+    doxami_ai_api_key: str = ""
+    doxami_ai_base_url: str = "https://api.openai.com/v1"
+    doxami_ai_model: str = "gpt-4o-mini"
+
 
 @lru_cache
 def get_settings() -> Settings:

@@ -4,11 +4,13 @@ from fastapi.middleware.cors import CORSMiddleware
 from app.config import get_settings
 from app.matching import DEFAULT_RADIUS_METERS
 from app.routers import (
+    ai,
     alerts,
     auth,
     communities,
     donations,
     donors,
+    events,
     health,
     hospitals,
     mesh,
@@ -54,13 +56,17 @@ app = FastAPI(
         "- `GET /mesh/status` — honest readiness (no fake P2P)\n"
         "- `POST /mesh/envelopes` — 501 until native transport exists\n"
         "Offline IndexedDB sync is NOT MESH.\n\n"
+        "## DOXAMI HUB services (Phase 7)\n"
+        "- `/events` — DB events CRUD list/create\n"
+        "- `/ai/status`, `/ai/chat` — requires DOXAMI_AI_API_KEY (else unavailable)\n"
+        "- Meet/Live remain UI placeholders without WebRTC infra\n\n"
         "## Legacy SOS Sang\n"
         f"Matching radius default **{DEFAULT_RADIUS_METERS} m**. "
         "Twilio SMS: stub. JWT required for DOXAMI routes only; "
         "legacy blood endpoints remain open for the hackathon demo.\n\n"
         "Never log emails, phones, passwords, GPS, or blood groups in cleartext."
     ),
-    version="0.6.0",
+    version="0.7.0",
 )
 
 app.add_middleware(
@@ -79,6 +85,8 @@ app.include_router(social.router)
 app.include_router(messaging.router)
 app.include_router(communities.router)
 app.include_router(mesh.router)
+app.include_router(events.router)
+app.include_router(ai.router)
 app.include_router(hospitals.router)
 app.include_router(donors.router)
 app.include_router(alerts.router)
@@ -106,6 +114,8 @@ def root():
             "/messages/threads",
             "/communities",
             "/mesh/status",
+            "/events",
+            "/ai/status",
             "/hospitals",
             "/hospitals/recognized",
             "/donors",
