@@ -3,12 +3,20 @@ import { NavLink, Route, Routes } from "react-router-dom";
 import BrandMark from "./components/BrandMark.jsx";
 import Toast from "./components/Toast.jsx";
 import useToast from "./hooks/useToast.js";
+import Communities from "./pages/doxami/Communities.jsx";
+import CommunityDetail from "./pages/doxami/CommunityDetail.jsx";
+import CommunityMembers from "./pages/doxami/CommunityMembers.jsx";
+import CommunityNew from "./pages/doxami/CommunityNew.jsx";
 import CreatePost from "./pages/doxami/CreatePost.jsx";
 import Explore from "./pages/doxami/Explore.jsx";
 import FollowList from "./pages/doxami/FollowList.jsx";
 import HomeFeed from "./pages/doxami/HomeFeed.jsx";
 import Hub from "./pages/doxami/Hub.jsx";
 import LegacySangHome from "./pages/doxami/LegacySangHome.jsx";
+import MessageInfo from "./pages/doxami/MessageInfo.jsx";
+import MessageNew from "./pages/doxami/MessageNew.jsx";
+import MessageThread from "./pages/doxami/MessageThread.jsx";
+import MessagesInbox from "./pages/doxami/MessagesInbox.jsx";
 import PlaceholderModule from "./pages/doxami/PlaceholderModule.jsx";
 import PostDetail from "./pages/doxami/PostDetail.jsx";
 import Profile from "./pages/doxami/Profile.jsx";
@@ -184,26 +192,27 @@ export default function App() {
           />
           <Route path="/explore" element={<Explore onToast={toast.show} />} />
           <Route path="/create" element={<CreatePost onToast={toast.show} />} />
+          <Route path="/messages" element={<MessagesInbox onToast={toast.show} />} />
+          <Route path="/messages/new" element={<MessageNew onToast={toast.show} />} />
+          <Route path="/messages/:threadId" element={<MessageThread onToast={toast.show} />} />
+          <Route path="/messages/:threadId/info" element={<MessageInfo />} />
           <Route
-            path="/messages"
+            path="/messages/:threadId/call"
             element={
               <PlaceholderModule
-                code="MSG-001"
-                title="Messages"
-                body="Messagerie 1:1 prévue en Phase 4."
+                code="MSG-009"
+                title="Appel audio"
+                body="WebRTC non déployé — aucun appel simulé."
               />
             }
           />
+          <Route path="/communities" element={<Communities />} />
+          <Route path="/communities/new" element={<CommunityNew onToast={toast.show} />} />
           <Route
-            path="/communities"
-            element={
-              <PlaceholderModule
-                code="COM-001"
-                title="Communities"
-                body="Communautés basiques prévues en Phase 4."
-              />
-            }
+            path="/communities/:communityId"
+            element={<CommunityDetail onToast={toast.show} />}
           />
+          <Route path="/communities/:communityId/members" element={<CommunityMembers />} />
           <Route path="/legacy/sang" element={<LegacySangHome />} />
           <Route
             path="/legacy/sang/donneur/inscription"
