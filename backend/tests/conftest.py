@@ -2,15 +2,25 @@
 
 from __future__ import annotations
 
+import os
+
+# Auth tests need a local JWT secret; never a production value.
+os.environ.setdefault("JWT_SECRET", "test-only-jwt-secret-not-for-production")
+os.environ.setdefault("JWT_ALGORITHM", "HS256")
+os.environ.setdefault("ACCESS_TOKEN_EXPIRE_MINUTES", "60")
+
 import pytest
 from fastapi.testclient import TestClient
 from sqlalchemy import create_engine, event
 from sqlalchemy.orm import Session, sessionmaker
 from sqlalchemy.pool import StaticPool
 
+from app.config import get_settings
 from app.db import get_db
 from app.main import app
 from app.models import Base
+
+get_settings.cache_clear()
 
 _POSTGRES_ONLY_DEFAULTS = ("gen_random_uuid()",)
 

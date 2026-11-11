@@ -4,7 +4,7 @@ import unittest
 from uuid import uuid4
 
 from app.enums import BloodGroup, DonationStatus
-from app.models import Base, Donor, Hospital, UrgencyRequest
+from app.models import Base, Donor, Hospital, UrgencyRequest, User
 from app.rules import UnrecognizedHospitalError, require_recognized_hospital
 from app.schemas import (
     DonationConfirmationCreate,
@@ -24,6 +24,7 @@ class ModelMetadataTests(unittest.TestCase):
                 "urgency_requests",
                 "donation_confirmations",
                 "urgency_matches",
+                "users",
             },
         )
 
@@ -36,6 +37,8 @@ class ModelMetadataTests(unittest.TestCase):
             Hospital.__table__.c.contact_phone.comment,
             UrgencyRequest.__table__.c.blood_group_needed.comment,
             UrgencyRequest.__table__.c.patient_display_name.comment,
+            User.__table__.c.email.comment,
+            User.__table__.c.password_hash.comment,
         }
         for comment in marked:
             self.assertIsNotNone(comment)
@@ -58,7 +61,7 @@ class SchemaTests(unittest.TestCase):
         payload = DonorCreate(
             display_name="Donneur Demo",
             blood_group=BloodGroup.O_POSITIVE,
-            phone="+22900000000",
+            phone="0190000000",
             city="Zone Demo",
         )
         self.assertEqual(payload.city, "Zone Demo")

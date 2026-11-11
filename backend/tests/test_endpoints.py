@@ -44,7 +44,7 @@ def _donor(
     city: str = "Zone Demo",
     blood_group: BloodGroup = BloodGroup.O_POSITIVE,
     available: bool = True,
-    phone: str = "+22900000000",
+    phone: str = "0190000000",
     name: str = "Donneur Demo",
 ) -> Donor:
     donor = Donor(
@@ -107,7 +107,7 @@ def test_register_donor_omits_phone(client: TestClient) -> None:
         json={
             "display_name": "Donneur Demo",
             "blood_group": "O+",
-            "phone": "+22900000000",
+            "phone": "0190000000",
             "city": "Zone Demo",
         },
     )
@@ -123,13 +123,13 @@ def test_register_donor_duplicate_phone_conflict(
     client: TestClient,
     db_session: Session,
 ) -> None:
-    _donor(db_session, phone="+22900000000")
+    _donor(db_session, phone="0190000000")
     response = client.post(
         "/donors",
         json={
             "display_name": "Donneur Demo 2",
             "blood_group": "A+",
-            "phone": "+22900000000",
+            "phone": "0190000000",
             "city": "Zone Demo",
         },
     )
@@ -195,28 +195,28 @@ def test_create_urgency_matches_compatible_city_donor(
         db_session,
         city="Zone Demo",
         blood_group=BloodGroup.O_NEGATIVE,
-        phone="+22900000001",
+        phone="0190000001",
         name="Donneur Demo Compatible",
     )
     _donor(
         db_session,
         city="Ville Demo",
         blood_group=BloodGroup.O_NEGATIVE,
-        phone="+22900000002",
+        phone="0190000002",
         name="Donneur Demo Loin",
     )
     _donor(
         db_session,
         city="Zone Demo",
         blood_group=BloodGroup.A_POSITIVE,
-        phone="+22900000003",
+        phone="0190000003",
         name="Donneur Demo Incompatible",
     )
     _donor(
         db_session,
         city="Zone Demo",
         blood_group=BloodGroup.O_NEGATIVE,
-        phone="+22900000004",
+        phone="0190000004",
         name="Donneur Demo Indisponible",
         available=False,
     )
@@ -317,7 +317,7 @@ def test_create_urgency_matches_gps_donor_inside_radius(
         id=uuid4(),
         display_name="Donneur Demo Proche",
         blood_group=BloodGroup.O_NEGATIVE,
-        phone="+22900000011",
+        phone="0190000011",
         city="Autre Ville Demo",
         location=geopoint_to_wkt(GeoPoint(latitude=6.38, longitude=2.42)),
         is_available=True,
@@ -326,7 +326,7 @@ def test_create_urgency_matches_gps_donor_inside_radius(
         id=uuid4(),
         display_name="Donneur Demo Loin",
         blood_group=BloodGroup.O_NEGATIVE,
-        phone="+22900000012",
+        phone="0190000012",
         city="Zone Demo",
         location=geopoint_to_wkt(GeoPoint(latitude=6.60, longitude=2.42)),
         is_available=True,
