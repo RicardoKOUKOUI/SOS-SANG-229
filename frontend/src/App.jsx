@@ -15,6 +15,8 @@ import ActionsHome from "./pages/doxami/ActionsHome.jsx";
 import ActionsNew from "./pages/doxami/ActionsNew.jsx";
 import AiHub from "./pages/doxami/AiHub.jsx";
 import Communities from "./pages/doxami/Communities.jsx";
+import CreatorHub from "./pages/doxami/CreatorHub.jsx";
+import CreatorMonetization from "./pages/doxami/CreatorMonetization.jsx";
 import PostToAction from "./pages/doxami/PostToAction.jsx";
 import CommunityDetail from "./pages/doxami/CommunityDetail.jsx";
 import CommunityMembers from "./pages/doxami/CommunityMembers.jsx";
@@ -211,9 +213,10 @@ export default function App() {
           />
           <Route path="/hub/events" element={<EventsHub onToast={toast.show} />} />
           <Route path="/hub/work" element={<PlaceholderModule code="HUB-WORK" title="Work" />} />
+          <Route path="/hub/creator" element={<CreatorHub onToast={toast.show} />} />
           <Route
-            path="/hub/creator"
-            element={<PlaceholderModule code="HUB-CREATOR" title="Creator Studio" />}
+            path="/hub/creator/monetization"
+            element={<CreatorMonetization onToast={toast.show} />}
           />
           <Route
             path="/hub/professional"

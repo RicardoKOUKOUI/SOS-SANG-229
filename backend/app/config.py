@@ -34,6 +34,10 @@ class Settings(BaseSettings):
     doxami_ai_base_url: str = "https://api.openai.com/v1"
     doxami_ai_model: str = "gpt-4o-mini"
 
+    # Optional PSP (Phase 9). Empty = payouts/checkout stay unavailable.
+    # A key alone does not enable transfers — no adapter is shipped.
+    doxami_psp_api_key: str = ""
+
 
 @lru_cache
 def get_settings() -> Settings:
