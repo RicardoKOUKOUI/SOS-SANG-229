@@ -87,7 +87,7 @@ export default function EmergencyAlert({ onToast }) {
       );
       setForm(INITIAL);
       if (result?.public_ref) {
-        navigate(`/suivi?ref=${encodeURIComponent(result.public_ref)}`);
+        navigate(`/legacy/sang/suivi?ref=${encodeURIComponent(result.public_ref)}`);
       }
     } catch (err) {
       onToast(err?.message || "Échec de la création d'alerte.");

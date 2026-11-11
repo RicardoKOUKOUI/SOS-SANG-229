@@ -10,7 +10,7 @@ _REPO_ROOT = Path(__file__).resolve().parents[2]
 
 
 class Settings(BaseSettings):
-    """Runtime config. DATABASE_URL must not be hardcoded in source."""
+    """Runtime config. Secrets must not be hardcoded in source."""
 
     model_config = SettingsConfigDict(
         env_file=(_BACKEND_DIR / ".env", _REPO_ROOT / ".env"),
@@ -21,6 +21,13 @@ class Settings(BaseSettings):
     database_url: str = ""
     # GPS matching radius (meters). City fallback is used when GPS is missing.
     match_radius_meters: int = 15_000
+
+    frontend_origin: str = "http://localhost:5173"
+
+    # Auth — required for /auth routes that issue tokens.
+    jwt_secret: str = ""
+    jwt_algorithm: str = "HS256"
+    access_token_expire_minutes: int = 60
 
 
 @lru_cache

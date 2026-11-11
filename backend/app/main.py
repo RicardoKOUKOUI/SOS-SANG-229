@@ -1,44 +1,52 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
+from app.config import get_settings
 from app.matching import DEFAULT_RADIUS_METERS
-from app.routers import alerts, donations, donors, health, hospitals, tracking
+from app.routers import alerts, auth, donations, donors, health, hospitals, tracking, users
+
+settings = get_settings()
+_cors_origins = [
+    origin.strip()
+    for origin in settings.frontend_origin.split(",")
+    if origin.strip()
+]
+if "http://localhost:5173" not in _cors_origins:
+    _cors_origins.append("http://localhost:5173")
+if "http://127.0.0.1:5173" not in _cors_origins:
+    _cors_origins.append("http://127.0.0.1:5173")
 
 app = FastAPI(
-    title="SOS Sang 229 API",
+    title="DOXAMI API (via SOS Sang 229 stack)",
     description=(
-        "MVP d’alerte et de matching donneur de sang — Hackathon Cursor Bénin.\n\n"
-        "## Endpoints métier\n"
-        "- `GET /health` — santé de l’API (sans base)\n"
-        "- `GET /hospitals` / `GET /hospitals/recognized` — établissements reconnus "
-        "(sans téléphone ni GPS)\n"
-        "- `POST /donors` — inscription donneur (téléphone / GPS omis en réponse)\n"
-        "- `POST /alerts` — créer une urgence (`hospital_id` reconnu obligatoire), "
-        "lancer le matching, enregistrer `alerted_donors_count`\n"
-        "- `POST /donations` — confirmer un don\n"
-        "- `GET /requests` et `GET /requests/{public_ref}` — suivi (compteurs / statut, "
-        "sans numéro de téléphone)\n\n"
-        "## Matching\n"
-        f"Rayon GPS par défaut : **{DEFAULT_RADIUS_METERS} m (15 km)**, "
-        "configurable via `MATCH_RADIUS_METERS`. "
-        "Si l'hôpital et le donneur ont un point GPS (WKT) : distance haversine (mètres). "
-        "Sinon : même ville (comparaison insensible à la casse). "
-        "Groupes compatibles ABO/Rh. Donneurs `is_available=true` uniquement.\n\n"
-        "Twilio / SMS réel : non branché (stub). JWT : non requis pour ce MVP. "
-        "Ne jamais logger téléphone, GPS ou groupe sanguin en clair."
+        "Phase 2 foundations: DOXAMI auth/profiles + legacy SOS Sang 229 blood MVP.\n\n"
+        "## DOXAMI auth\n"
+        "- `POST /auth/register` — create account + JWT\n"
+        "- `POST /auth/login` — JWT\n"
+        "- `GET /auth/me` — current user\n"
+        "- `POST /auth/logout` — client discard (stateless)\n"
+        "- `PATCH /users/me` — update profile\n"
+        "- `GET /users/{username}` — public profile\n\n"
+        "## Legacy SOS Sang\n"
+        f"Matching radius default **{DEFAULT_RADIUS_METERS} m**. "
+        "Twilio SMS: stub. JWT required for DOXAMI routes only; "
+        "legacy blood endpoints remain open for the hackathon demo.\n\n"
+        "Never log emails, phones, passwords, GPS, or blood groups in cleartext."
     ),
-    version="0.2.0",
+    version="0.3.0",
 )
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:5173", "http://127.0.0.1:5173"],
+    allow_origins=_cors_origins,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
 app.include_router(health.router)
+app.include_router(auth.router)
+app.include_router(users.router)
 app.include_router(hospitals.router)
 app.include_router(donors.router)
 app.include_router(alerts.router)
@@ -49,11 +57,18 @@ app.include_router(tracking.router)
 @app.get("/")
 def root():
     return {
-        "service": "sos-sang-229",
+        "service": "doxami",
+        "legacy": "sos-sang-229",
         "docs": "/docs",
         "health": "/health",
         "endpoints": [
             "/health",
+            "/auth/register",
+            "/auth/login",
+            "/auth/me",
+            "/auth/logout",
+            "/users/me",
+            "/users/{username}",
             "/hospitals",
             "/hospitals/recognized",
             "/donors",

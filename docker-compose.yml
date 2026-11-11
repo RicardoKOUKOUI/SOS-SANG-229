@@ -1,5 +1,4 @@
-# Local Postgres + PostGIS for Alembic migrations (backend/).
-# Enable PostGIS via `alembic upgrade head` (CREATE EXTENSION).
+# Local Postgres (PostGIS image; app currently stores GPS as Text WKT).
 # Do not put production credentials here.
 
 services:

@@ -1,7 +1,7 @@
 # Backend — SOS Sang 229
 
-API FastAPI : inscription donneur, hôpitaux reconnus, alerte + matching PostGIS,
-confirmation de don, suivi. Point d’entrée : `app/main.py`.
+API FastAPI : auth DOXAMI (JWT) + legacy SOS Sang (donors/alerts/matching haversine Text WKT,
+donations, tracking). Point d’entrée : `app/main.py`.
 
 ## Lancer l’API
 
@@ -22,7 +22,7 @@ Lancer ces commandes depuis le dossier `backend/`.
 ## Postgres + PostGIS et migrations
 
 La base locale est le service `db` de `docker-compose.yml` (`postgis/postgis:16-3.4`).
-L’extension PostGIS est activée par la première migration Alembic.
+Les locations sont stockées en Text WKT ; le matching utilise haversine Python (pas ST_DWithin). L’image Compose PostGIS reste compatible.
 
 1. À la racine du dépôt, copier `.env.example` vers `.env` (jamais commité).
 2. Définir un mot de passe local dans `.env`, par exemple :
@@ -31,6 +31,7 @@ L’extension PostGIS est activée par la première migration Alembic.
    POSTGRES_PASSWORD=changeme_local_only
    DATABASE_URL=postgresql://sos_sang:changeme_local_only@127.0.0.1:5432/sos_sang_229
    MATCH_RADIUS_METERS=15000
+   JWT_SECRET=local-dev-only-change-me
    ```
 
    Utiliser uniquement des identifiants locaux fictifs. Ne pas y mettre de secrets de production.

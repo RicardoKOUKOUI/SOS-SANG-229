@@ -1,6 +1,6 @@
-# Frontend — SOS Sang 229
+# Frontend — DOXAMI (+ legacy SOS Sang 229)
 
-React (JavaScript) + Tailwind CSS, bundlé avec Vite.
+React (JavaScript) + Tailwind CSS + Vite.
 
 ## Lancer
 
@@ -11,13 +11,17 @@ npm run dev
 
 App : [http://localhost:5173](http://localhost:5173)
 
-## Routes (maquette statique)
+Le proxy Vite `/api` → `http://127.0.0.1:8000` est configuré dans `vite.config.js`.
+
+## Routes principales
 
 | Chemin | Écran |
 | --- | --- |
-| `/` | Accueil — intention produit et accès aux 3 parcours |
-| `/donneur/inscription` | Inscription donneur (groupe, téléphone fictif, ville, consentement GPS) |
-| `/alerte` | Alerte urgence (groupe, patient démo, hôpital reconnu — select uniquement) |
-| `/suivi` | Suivi — lignes REQ-DEMO-* et état vide |
+| `/` | Accueil DOXAMI (feed placeholder Phase 2) |
+| `/auth/*` | Welcome, register, login, forgot, verify, logout |
+| `/profile`, `/profile/edit` | Profil authentifié |
+| `/u/:username` | Profil public |
+| `/hub` | Hub + modules placeholder |
+| `/legacy/sang/*` | Démo hackathon SOS Sang (branchée API) |
 
-Les soumissions affichent un toast local. Aucun appel API, aucun stockage persistant. Ne pas saisir de données personnelles réelles.
+Anciennes URLs `/donneur/inscription`, `/alerte`, `/suivi` restent accessibles temporairement.
