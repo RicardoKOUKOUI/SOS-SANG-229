@@ -3,10 +3,14 @@ import { NavLink, Route, Routes } from "react-router-dom";
 import BrandMark from "./components/BrandMark.jsx";
 import Toast from "./components/Toast.jsx";
 import useToast from "./hooks/useToast.js";
+import CreatePost from "./pages/doxami/CreatePost.jsx";
+import Explore from "./pages/doxami/Explore.jsx";
+import FollowList from "./pages/doxami/FollowList.jsx";
 import HomeFeed from "./pages/doxami/HomeFeed.jsx";
 import Hub from "./pages/doxami/Hub.jsx";
 import LegacySangHome from "./pages/doxami/LegacySangHome.jsx";
 import PlaceholderModule from "./pages/doxami/PlaceholderModule.jsx";
+import PostDetail from "./pages/doxami/PostDetail.jsx";
 import Profile from "./pages/doxami/Profile.jsx";
 import ProfileEdit from "./pages/doxami/ProfileEdit.jsx";
 import PublicProfile from "./pages/doxami/PublicProfile.jsx";
@@ -123,7 +127,7 @@ export default function App() {
 
       <main id="contenu" className="flex-1 pb-20 lg:pb-0">
         <Routes>
-          <Route path="/" element={<HomeFeed />} />
+          <Route path="/" element={<HomeFeed onToast={toast.show} />} />
           <Route path="/auth" element={<Welcome />} />
           <Route path="/auth/register" element={<Register onToast={toast.show} />} />
           <Route path="/auth/login" element={<Login onToast={toast.show} />} />
@@ -132,7 +136,10 @@ export default function App() {
           <Route path="/auth/logout" element={<Logout />} />
           <Route path="/profile" element={<Profile />} />
           <Route path="/profile/edit" element={<ProfileEdit onToast={toast.show} />} />
-          <Route path="/u/:username" element={<PublicProfile />} />
+          <Route path="/u/:username" element={<PublicProfile onToast={toast.show} />} />
+          <Route path="/u/:username/followers" element={<FollowList mode="followers" />} />
+          <Route path="/u/:username/following" element={<FollowList mode="following" />} />
+          <Route path="/posts/:postId" element={<PostDetail onToast={toast.show} />} />
           <Route path="/settings" element={<Settings />} />
           <Route path="/settings/privacy" element={<SettingsPrivacy />} />
           <Route path="/settings/language" element={<SettingsLanguage />} />
@@ -175,26 +182,8 @@ export default function App() {
             path="/hub/actions"
             element={<PlaceholderModule code="HUB-ACTIONS" title="Actions" />}
           />
-          <Route
-            path="/explore"
-            element={
-              <PlaceholderModule
-                code="EXPLORE-001"
-                title="Explorer"
-                body="Recherche universelle prévue en Phase 3."
-              />
-            }
-          />
-          <Route
-            path="/create"
-            element={
-              <PlaceholderModule
-                code="CREATE-001"
-                title="Créer"
-                body="Composer publication prévu en Phase 3. Pas de faux upload."
-              />
-            }
-          />
+          <Route path="/explore" element={<Explore onToast={toast.show} />} />
+          <Route path="/create" element={<CreatePost onToast={toast.show} />} />
           <Route
             path="/messages"
             element={

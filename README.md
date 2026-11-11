@@ -1,11 +1,11 @@
 # DOXAMI (stack issue de SOS Sang 229)
 
-Écosystème DOXAMI en construction (**Phase 2 — fondations**) sur le dépôt hackathon **SOS Sang 229** (Option A : évoluer en place, démo sang préservée sous `/legacy/sang`).
+Écosystème DOXAMI en construction (**Phase 3 — social light** sur fondations Phase 2) sur le dépôt hackathon **SOS Sang 229** (Option A : évoluer en place, démo sang préservée sous `/legacy/sang`).
 
 | Couche | Stack | Statut Phase 2 |
 | --- | --- | --- |
-| Frontend | React + Vite + Tailwind | Shell DOXAMI (nav 6 items), auth UI, profils, Hub placeholders |
-| Backend | FastAPI | `/auth/*`, `/users/*` (JWT + bcrypt) + legacy sang |
+| Frontend | React + Vite + Tailwind | Shell DOXAMI, auth, feed/create/explore, follow/like, Hub placeholders |
+| Backend | FastAPI | auth + `/posts`, follow/like, `/explore/search` + legacy sang |
 | Base | PostgreSQL (+ image PostGIS en local) | Migration `004_users` ; matching sang = haversine Text WKT (pas ST_DWithin) |
 | SMS | Twilio | Stub uniquement |
 | CI | GitHub Actions | `pytest` + `npm run build` |
