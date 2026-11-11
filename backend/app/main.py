@@ -15,6 +15,7 @@ from app.routers import (
     events,
     health,
     hospitals,
+    listings,
     mesh,
     messaging,
     posts,
@@ -68,13 +69,16 @@ app = FastAPI(
         "- `/creator/me` — studio profile\n"
         "- `/monetization/status` — ads/premium flags; payouts_ready stays false\n"
         "- checkout and payouts return 503 (no PSP adapter, earnings 0)\n\n"
+        "## DOXAMI professional & marketplace (Phase 10)\n"
+        "- `/professional/me`, `/professionals`, `/jobs`, `/marketplace`\n"
+        "- listing checkout returns 503 (Pay is not active; price is display-only)\n\n"
         "## Legacy SOS Sang\n"
         f"Matching radius default **{DEFAULT_RADIUS_METERS} m**. "
         "Twilio SMS: stub. JWT required for DOXAMI routes only; "
         "legacy blood endpoints remain open for the hackathon demo.\n\n"
         "Never log emails, phones, passwords, GPS, or blood groups in cleartext."
     ),
-    version="0.9.0",
+    version="0.10.0",
 )
 
 app.add_middleware(
@@ -97,6 +101,7 @@ app.include_router(events.router)
 app.include_router(ai.router)
 app.include_router(actions.router)
 app.include_router(creator.router)
+app.include_router(listings.router)
 app.include_router(hospitals.router)
 app.include_router(donors.router)
 app.include_router(alerts.router)
@@ -129,6 +134,9 @@ def root():
             "/actions",
             "/creator/me",
             "/monetization/status",
+            "/professionals",
+            "/jobs",
+            "/marketplace",
             "/hospitals",
             "/hospitals/recognized",
             "/donors",

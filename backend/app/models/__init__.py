@@ -7,6 +7,7 @@ from app.models.actions import ActionMember, ActionProject, ActionTask
 from app.models.creator import CreatorProfile, FeatureFlag
 from app.models.hospital import Hospital
 from app.models.hub import Event
+from app.models.listings import JobListing, MarketListing, ProfessionalProfile
 from app.models.match import UrgencyMatch
 from app.models.messaging import (
     Community,
@@ -40,9 +41,12 @@ __all__ = [
     "FeatureFlag",
     "Follow",
     "Hospital",
+    "JobListing",
+    "MarketListing",
     "Post",
     "PostComment",
     "PostLike",
+    "ProfessionalProfile",
     "UrgencyMatch",
     "UrgencyRequest",
     "User",
