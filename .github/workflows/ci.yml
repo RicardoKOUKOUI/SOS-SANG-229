@@ -39,5 +39,7 @@ jobs:
           cache-dependency-path: frontend/package-lock.json
       - name: Install
         run: npm ci
+      - name: Mesh mode check
+        run: npm run check
       - name: Build
         run: npm run build

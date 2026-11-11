@@ -3,6 +3,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from app.config import get_settings
 from app.matching import DEFAULT_RADIUS_METERS
+from app.middleware import SecurityHeadersMiddleware
 from app.routers import (
     actions,
     admin,
@@ -77,13 +78,17 @@ app = FastAPI(
         "- `/admin/*` requires role=admin and a TOTP-backed token (`mfa` claim)\n"
         "- moderation covers public posts only (no private messages)\n"
         "- bootstrap stays 503 until DOXAMI_ADMIN_BOOTSTRAP_TOKEN is set\n\n"
+        "## Hardening (Phase 12)\n"
+        "- security headers; auth/admin responses are `Cache-Control: no-store`\n"
+        "- list endpoints stay capped (low bandwidth)\n"
+        "- MESH cannot be forced ready by a query flag\n\n"
         "## Legacy SOS Sang\n"
         f"Matching radius default **{DEFAULT_RADIUS_METERS} m**. "
         "Twilio SMS: stub. JWT required for DOXAMI routes only; "
         "legacy blood endpoints remain open for the hackathon demo.\n\n"
         "Never log emails, phones, passwords, GPS, or blood groups in cleartext."
     ),
-    version="0.11.0",
+    version="0.12.0",
 )
 
 app.add_middleware(
@@ -93,6 +98,7 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+app.add_middleware(SecurityHeadersMiddleware)
 
 app.include_router(health.router)
 app.include_router(auth.router)
