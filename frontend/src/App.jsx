@@ -15,6 +15,7 @@ import FollowList from "./pages/doxami/FollowList.jsx";
 import HomeFeed from "./pages/doxami/HomeFeed.jsx";
 import Hub from "./pages/doxami/Hub.jsx";
 import LegacySangHome from "./pages/doxami/LegacySangHome.jsx";
+import MeshHub from "./pages/doxami/MeshHub.jsx";
 import MessageInfo from "./pages/doxami/MessageInfo.jsx";
 import MessageNew from "./pages/doxami/MessageNew.jsx";
 import MessageThread from "./pages/doxami/MessageThread.jsx";
@@ -192,7 +193,7 @@ export default function App() {
             path="/hub/professional"
             element={<PlaceholderModule code="HUB-PRO" title="Professional" />}
           />
-          <Route path="/hub/mesh" element={<PlaceholderModule code="HUB-MESH" title="MESH" />} />
+          <Route path="/hub/mesh" element={<MeshHub />} />
           <Route
             path="/hub/actions"
             element={<PlaceholderModule code="HUB-ACTIONS" title="Actions" />}

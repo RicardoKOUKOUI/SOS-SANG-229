@@ -11,6 +11,7 @@ from app.routers import (
     donors,
     health,
     hospitals,
+    mesh,
     messaging,
     posts,
     social,
@@ -49,13 +50,17 @@ app = FastAPI(
         "## DOXAMI messaging & communities (Phase 4)\n"
         "- `/messages/threads*` — 1:1 + group text (polling, no WebRTC)\n"
         "- `/communities*` — public communities, rooms, text chat\n\n"
+        "## DOXAMI MESH (Phase 6 — architecture-ready)\n"
+        "- `GET /mesh/status` — honest readiness (no fake P2P)\n"
+        "- `POST /mesh/envelopes` — 501 until native transport exists\n"
+        "Offline IndexedDB sync is NOT MESH.\n\n"
         "## Legacy SOS Sang\n"
         f"Matching radius default **{DEFAULT_RADIUS_METERS} m**. "
         "Twilio SMS: stub. JWT required for DOXAMI routes only; "
         "legacy blood endpoints remain open for the hackathon demo.\n\n"
         "Never log emails, phones, passwords, GPS, or blood groups in cleartext."
     ),
-    version="0.5.0",
+    version="0.6.0",
 )
 
 app.add_middleware(
@@ -73,6 +78,7 @@ app.include_router(posts.router)
 app.include_router(social.router)
 app.include_router(messaging.router)
 app.include_router(communities.router)
+app.include_router(mesh.router)
 app.include_router(hospitals.router)
 app.include_router(donors.router)
 app.include_router(alerts.router)
@@ -99,6 +105,7 @@ def root():
             "/explore/search",
             "/messages/threads",
             "/communities",
+            "/mesh/status",
             "/hospitals",
             "/hospitals/recognized",
             "/donors",
