@@ -1,5 +1,12 @@
 import { useState } from "react";
-import { NavLink, Route, Routes } from "react-router-dom";
+import { NavLink, Route, Routes, useLocation } from "react-router-dom";
+import AdminDashboard from "./pages/admin/AdminDashboard.jsx";
+import AdminFlags from "./pages/admin/AdminFlags.jsx";
+import AdminGuard from "./pages/admin/AdminGuard.jsx";
+import AdminLogin from "./pages/admin/AdminLogin.jsx";
+import AdminLogs from "./pages/admin/AdminLogs.jsx";
+import AdminModeration from "./pages/admin/AdminModeration.jsx";
+import AdminUsers from "./pages/admin/AdminUsers.jsx";
 import BrandMark from "./components/BrandMark.jsx";
 import OfflineBanners from "./components/OfflineBanners.jsx";
 import Toast from "./components/Toast.jsx";
@@ -75,6 +82,8 @@ function navClass({ isActive }) {
 export default function App() {
   const toast = useToast();
   const [menuOpen, setMenuOpen] = useState(false);
+  const { pathname } = useLocation();
+  const adminShell = pathname.startsWith("/admin");
 
   return (
     <OfflineProvider onToast={toast.show}>
@@ -88,6 +97,7 @@ export default function App() {
 
       <OfflineBanners />
 
+      {adminShell ? null : (
       <header className="sticky top-0 z-30 border-b border-light/80 bg-paper/85 backdrop-blur-md">
         <div className="mx-auto flex max-w-5xl items-center justify-between gap-4 px-4 py-3 sm:px-6 lg:px-8">
           <NavLink to="/" className="flex min-w-0 items-center gap-2.5" end>
@@ -157,6 +167,7 @@ export default function App() {
           </nav>
         ) : null}
       </header>
+      )}
 
       <main id="contenu" className="flex-1 pb-20 lg:pb-0">
         <Routes>
@@ -274,9 +285,18 @@ export default function App() {
           <Route path="/donneur/inscription" element={<DonorRegistration onToast={toast.show} />} />
           <Route path="/alerte" element={<EmergencyAlert onToast={toast.show} />} />
           <Route path="/suivi" element={<LiveTracking onToast={toast.show} />} />
+          <Route path="/admin/login" element={<AdminLogin onToast={toast.show} />} />
+          <Route path="/admin" element={<AdminGuard onToast={toast.show} />}>
+            <Route index element={<AdminDashboard />} />
+            <Route path="users" element={<AdminUsers onToast={toast.show} />} />
+            <Route path="moderation" element={<AdminModeration onToast={toast.show} />} />
+            <Route path="flags" element={<AdminFlags onToast={toast.show} />} />
+            <Route path="logs" element={<AdminLogs />} />
+          </Route>
         </Routes>
       </main>
 
+      {adminShell ? null : (
       <footer className="hidden border-t border-light bg-secondary lg:block">
         <div className="mx-auto flex max-w-5xl flex-col gap-1 px-4 py-6 text-sm text-white/80 sm:flex-row sm:items-center sm:justify-between sm:px-6 lg:px-8">
           <p className="font-display font-semibold text-white">DOXAMI</p>
@@ -288,7 +308,9 @@ export default function App() {
           </p>
         </div>
       </footer>
+      )}
 
+      {adminShell ? null : (
       <nav
         aria-label="Navigation principale"
         className="fixed inset-x-0 bottom-0 z-30 border-t border-light bg-paper/95 backdrop-blur-md lg:hidden"
@@ -311,6 +333,7 @@ export default function App() {
           ))}
         </ul>
       </nav>
+      )}
 
       <Toast message={toast.message} onDismiss={toast.dismiss} />
     </div>

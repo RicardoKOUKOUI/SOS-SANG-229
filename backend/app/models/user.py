@@ -50,3 +50,14 @@ class User(TimestampMixin, Base):
     )
     is_active: Mapped[bool] = mapped_column(Boolean, nullable=False, default=True)
     email_verified: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
+    role: Mapped[str] = mapped_column(
+        String(16), nullable=False, default="member", server_default=text("'member'")
+    )
+    totp_secret: Mapped[str | None] = mapped_column(
+        String(64),
+        nullable=True,
+        comment=f"TOTP shared secret. {_SENSITIVE}",
+    )
+    totp_enabled: Mapped[bool] = mapped_column(
+        Boolean, nullable=False, default=False, server_default=text("false")
+    )

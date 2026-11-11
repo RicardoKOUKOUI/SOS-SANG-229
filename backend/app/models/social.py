@@ -5,7 +5,7 @@ from __future__ import annotations
 import uuid
 from typing import TYPE_CHECKING
 
-from sqlalchemy import ForeignKey, Index, Text, UniqueConstraint, Uuid, text
+from sqlalchemy import Boolean, ForeignKey, Index, Text, UniqueConstraint, Uuid, text
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.models.base import Base, TimestampMixin
@@ -32,6 +32,9 @@ class Post(TimestampMixin, Base):
         nullable=False,
     )
     body: Mapped[str] = mapped_column(Text, nullable=False)
+    hidden: Mapped[bool] = mapped_column(
+        Boolean, nullable=False, default=False, server_default=text("false")
+    )
 
     author: Mapped["User"] = relationship()
     likes: Mapped[list["PostLike"]] = relationship(

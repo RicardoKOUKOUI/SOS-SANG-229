@@ -78,7 +78,12 @@ def list_posts(
 ) -> list[PostRead]:
     from app.models.social import Follow
 
-    query = select(Post).options(selectinload(Post.author)).order_by(Post.created_at.desc())
+    query = (
+        select(Post)
+        .options(selectinload(Post.author))
+        .where(Post.hidden.is_(False))
+        .order_by(Post.created_at.desc())
+    )
     if tab == "following":
         if viewer is None:
             raise HTTPException(
@@ -100,7 +105,7 @@ def get_post(
     post = db.scalar(
         select(Post).options(selectinload(Post.author)).where(Post.id == post_id)
     )
-    if post is None:
+    if post is None or post.hidden:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Post not found.")
     return _post_read(db, post, viewer)
 

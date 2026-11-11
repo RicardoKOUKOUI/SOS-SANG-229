@@ -26,7 +26,12 @@ def verify_password(password: str, password_hash: str) -> bool:
         return False
 
 
-def create_access_token(*, user_id: UUID, expires_minutes: int | None = None) -> str:
+def create_access_token(
+    *,
+    user_id: UUID,
+    expires_minutes: int | None = None,
+    mfa: bool = False,
+) -> str:
     settings = get_settings()
     secret = settings.jwt_secret
     if not secret:
@@ -44,6 +49,7 @@ def create_access_token(*, user_id: UUID, expires_minutes: int | None = None) ->
         "iat": now,
         "exp": now + timedelta(minutes=minutes),
         "typ": "access",
+        "mfa": mfa,
     }
     return jwt.encode(payload, secret, algorithm=settings.jwt_algorithm)
 
