@@ -1,6 +1,6 @@
 # DOXAMI (stack issue de SOS Sang 229)
 
-Écosystème DOXAMI en construction (**Phase 7 — HUB Events + AI ready-to-wire**) sur le dépôt hackathon **SOS Sang 229** (Option A : évoluer en place, démo sang préservée sous `/legacy/sang`).
+Écosystème DOXAMI en construction (**Phase 8 — DOXAMI ACTIONS**) sur le dépôt hackathon **SOS Sang 229** (Option A : évoluer en place, démo sang préservée sous `/legacy/sang`).
 
 | Couche | Stack | Statut Phase 2 |
 | --- | --- | --- |

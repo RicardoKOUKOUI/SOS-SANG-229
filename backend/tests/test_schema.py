@@ -37,6 +37,9 @@ class ModelMetadataTests(unittest.TestCase):
                 "community_rooms",
                 "community_messages",
                 "events",
+                "action_projects",
+                "action_tasks",
+                "action_members",
             },
         )
 

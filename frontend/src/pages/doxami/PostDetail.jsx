@@ -88,6 +88,14 @@ export default function PostDetail({ onToast }) {
       {post ? (
         <div className="mt-6 space-y-6">
           <PostCard post={post} onToggleLike={onToggleLike} />
+          {isAuthenticated ? (
+            <Link
+              to={`/posts/${post.id}/to-action`}
+              className="inline-flex text-sm font-semibold text-primary"
+            >
+              ACT-003 · Transformer en action →
+            </Link>
+          ) : null}
           <div>
             <h2 className="text-xl font-bold">Commentaires · POST-002</h2>
             <ul className="mt-4 space-y-3">
